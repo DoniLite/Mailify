@@ -58,7 +58,11 @@ impl<'a> TemplateRenderer<'a> {
         let html_out = self.render_str(html, ctx)?;
         let subject = self.render_str(subject_template, ctx)?;
         let text_out = text.map(|t| self.render_str(t, ctx)).transpose()?;
-        Ok(RenderedEmail { subject, html: html_out, text: text_out })
+        Ok(RenderedEmail {
+            subject,
+            html: html_out,
+            text: text_out,
+        })
     }
 
     fn render_assets(
@@ -78,7 +82,11 @@ impl<'a> TemplateRenderer<'a> {
             .as_ref()
             .map(|t| self.render_str(t, ctx))
             .transpose()?;
-        Ok(RenderedEmail { subject, html, text })
+        Ok(RenderedEmail {
+            subject,
+            html,
+            text,
+        })
     }
 
     fn render_str(&self, source: &str, ctx: &RenderContext) -> Result<String, RenderError> {

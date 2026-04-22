@@ -43,7 +43,10 @@ pub struct TemplateRegistry {
 
 impl TemplateRegistry {
     pub fn empty(i18n: I18nConfig) -> Self {
-        Self { inner: HashMap::new(), i18n }
+        Self {
+            inner: HashMap::new(),
+            i18n,
+        }
     }
 
     /// Scan filesystem, load every `<id>/<locale>.html`. Subject/text optional siblings.
@@ -82,28 +85,40 @@ impl TemplateRegistry {
                     continue;
                 };
 
-                let html = fs::read_to_string(&sub_path).map_err(|source| {
-                    TemplateRegistryError::Io { path: sub_path.clone(), source }
-                })?;
+                let html =
+                    fs::read_to_string(&sub_path).map_err(|source| TemplateRegistryError::Io {
+                        path: sub_path.clone(),
+                        source,
+                    })?;
 
                 let subject_path = path.join(format!("subject.{locale}.txt"));
-                let subject = fs::read_to_string(&subject_path).ok().map(|s| s.trim().to_owned());
+                let subject = fs::read_to_string(&subject_path)
+                    .ok()
+                    .map(|s| s.trim().to_owned());
 
                 let text_path = path.join(format!("text.{locale}.txt"));
                 let text = fs::read_to_string(&text_path).ok();
 
                 debug!(template = %id, locale = %locale, "loaded template");
                 registry.inner.insert(
-                    TemplateKey { id: id.clone(), locale: locale.to_owned() },
-                    TemplateAssets { html, subject, text },
+                    TemplateKey {
+                        id: id.clone(),
+                        locale: locale.to_owned(),
+                    },
+                    TemplateAssets {
+                        html,
+                        subject,
+                        text,
+                    },
                 );
             }
 
             if strict {
                 let default = &i18n.default_locale;
-                let has_default = registry
-                    .inner
-                    .contains_key(&TemplateKey { id: id.clone(), locale: default.clone() });
+                let has_default = registry.inner.contains_key(&TemplateKey {
+                    id: id.clone(),
+                    locale: default.clone(),
+                });
                 if !has_default {
                     return Err(TemplateRegistryError::MissingDefaultLocale(id));
                 }
@@ -114,7 +129,11 @@ impl TemplateRegistry {
     }
 
     /// Resolve the best-matching asset for a requested locale using the configured fallback chain.
-    pub fn get(&self, id: &str, requested_locale: &str) -> Result<&TemplateAssets, TemplateRegistryError> {
+    pub fn get(
+        &self,
+        id: &str,
+        requested_locale: &str,
+    ) -> Result<&TemplateAssets, TemplateRegistryError> {
         let chain = self.fallback_chain(requested_locale);
         for locale in &chain {
             if let Some(assets) = self.inner.get(&TemplateKey {

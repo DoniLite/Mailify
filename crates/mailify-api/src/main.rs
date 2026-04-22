@@ -59,7 +59,8 @@ async fn main() -> anyhow::Result<()> {
 
     let app = build_router(state);
 
-    let listener = tokio::net::TcpListener::bind((cfg.server.host.as_str(), cfg.server.port)).await?;
+    let listener =
+        tokio::net::TcpListener::bind((cfg.server.host.as_str(), cfg.server.port)).await?;
     info!(addr = %listener.local_addr()?, "http listening");
 
     let http_token = shutdown.clone();
@@ -78,11 +79,13 @@ async fn main() -> anyhow::Result<()> {
 }
 
 fn init_tracing(cfg: &AppConfig) {
-    let filter = EnvFilter::try_new(&cfg.observability.log_level)
-        .unwrap_or_else(|_| EnvFilter::new("info"));
+    let filter =
+        EnvFilter::try_new(&cfg.observability.log_level).unwrap_or_else(|_| EnvFilter::new("info"));
     let registry = tracing_subscriber::registry().with(filter);
     match cfg.observability.log_format {
-        LogFormat::Json => registry.with(tracing_subscriber::fmt::layer().json()).init(),
+        LogFormat::Json => registry
+            .with(tracing_subscriber::fmt::layer().json())
+            .init(),
         LogFormat::Pretty => registry.with(tracing_subscriber::fmt::layer()).init(),
     }
 }

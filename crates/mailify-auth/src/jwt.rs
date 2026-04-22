@@ -38,7 +38,11 @@ impl JwtIssuer {
         }
     }
 
-    pub fn issue(&self, subject: impl Into<String>, scopes: Vec<String>) -> Result<String, JwtError> {
+    pub fn issue(
+        &self,
+        subject: impl Into<String>,
+        scopes: Vec<String>,
+    ) -> Result<String, JwtError> {
         let now = Utc::now().timestamp();
         let claims = Claims {
             sub: subject.into(),
@@ -47,8 +51,12 @@ impl JwtIssuer {
             exp: now + self.ttl_secs,
             scopes,
         };
-        encode(&Header::default(), &claims, &EncodingKey::from_secret(self.secret.as_bytes()))
-            .map_err(|e| JwtError::Encode(e.to_string()))
+        encode(
+            &Header::default(),
+            &claims,
+            &EncodingKey::from_secret(self.secret.as_bytes()),
+        )
+        .map_err(|e| JwtError::Encode(e.to_string()))
     }
 
     pub fn verify(&self, token: &str) -> Result<Claims, JwtError> {

@@ -12,14 +12,22 @@ pub struct EmailAddress {
 
 impl EmailAddress {
     pub fn new(email: impl Into<String>) -> Result<Self> {
-        let e = Self { email: email.into(), name: None };
-        e.validate().map_err(|err| CoreError::InvalidEmailAddress(err.to_string()))?;
+        let e = Self {
+            email: email.into(),
+            name: None,
+        };
+        e.validate()
+            .map_err(|err| CoreError::InvalidEmailAddress(err.to_string()))?;
         Ok(e)
     }
 
     pub fn with_name(email: impl Into<String>, name: impl Into<String>) -> Result<Self> {
-        let e = Self { email: email.into(), name: Some(name.into()) };
-        e.validate().map_err(|err| CoreError::InvalidEmailAddress(err.to_string()))?;
+        let e = Self {
+            email: email.into(),
+            name: Some(name.into()),
+        };
+        e.validate()
+            .map_err(|err| CoreError::InvalidEmailAddress(err.to_string()))?;
         Ok(e)
     }
 }

@@ -15,11 +15,7 @@ pub struct AuthLayer {
 }
 
 /// Axum middleware: extract `Authorization: Bearer <jwt>`, verify, inject `Claims` extension.
-pub async fn require_jwt(
-    State(layer): State<AuthLayer>,
-    mut req: Request,
-    next: Next,
-) -> Response {
+pub async fn require_jwt(State(layer): State<AuthLayer>, mut req: Request, next: Next) -> Response {
     let Some(header) = req.headers().get(axum::http::header::AUTHORIZATION) else {
         return unauthorized("missing Authorization header");
     };

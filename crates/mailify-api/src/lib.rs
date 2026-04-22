@@ -6,22 +6,35 @@ use std::sync::Arc;
 
 use axum::{http::StatusCode, middleware, routing::get, Router};
 use mailify_auth::{middleware::AuthLayer, require_jwt};
-use tower_http::{cors::CorsLayer, limit::RequestBodyLimitLayer, timeout::TimeoutLayer, trace::TraceLayer};
+use tower_http::{
+    cors::CorsLayer, limit::RequestBodyLimitLayer, timeout::TimeoutLayer, trace::TraceLayer,
+};
 
 pub use state::AppState;
 
 pub fn build_router(state: AppState) -> Router {
-    let auth_layer = AuthLayer { issuer: state.jwt.clone() };
+    let auth_layer = AuthLayer {
+        issuer: state.jwt.clone(),
+    };
 
     let protected = Router::new()
-        .route("/mail/send", axum::routing::post(routes::mail::send_registered))
-        .route("/mail/send-custom", axum::routing::post(routes::mail::send_custom))
+        .route(
+            "/mail/send",
+            axum::routing::post(routes::mail::send_registered),
+        )
+        .route(
+            "/mail/send-custom",
+            axum::routing::post(routes::mail::send_custom),
+        )
         .route("/templates", get(routes::templates::list))
         .route_layer(middleware::from_fn_with_state(auth_layer, require_jwt));
 
     let public = Router::new()
         .route("/health", get(routes::health::health))
-        .route("/auth/token", axum::routing::post(routes::auth::issue_token));
+        .route(
+            "/auth/token",
+            axum::routing::post(routes::auth::issue_token),
+        );
 
     Router::new()
         .merge(public)

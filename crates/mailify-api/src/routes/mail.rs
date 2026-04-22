@@ -73,15 +73,20 @@ pub async fn send_registered(
     State(state): State<Arc<AppState>>,
     Json(req): Json<SendRegisteredRequest>,
 ) -> Result<Json<EnqueuedResponse>, ApiError> {
-    req.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    req.validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let from = default_from(&state, req.from)?;
-    let locale = req.locale.unwrap_or_else(|| state.cfg.i18n.default_locale.clone());
+    let locale = req
+        .locale
+        .unwrap_or_else(|| state.cfg.i18n.default_locale.clone());
 
     let job = MailJob {
         id: Uuid::new_v4(),
         priority: req.priority,
-        kind: MailJobKind::Registered { template_id: req.template_id },
+        kind: MailJobKind::Registered {
+            template_id: req.template_id,
+        },
         from,
         to: req.to,
         cc: req.cc,
@@ -96,18 +101,27 @@ pub async fn send_registered(
     };
 
     let mut queue = state.queue.clone();
-    let id = queue.push(job).await.map_err(|e| ApiError::Internal(e.to_string()))?;
-    Ok(Json(EnqueuedResponse { job_id: id, status: "queued" }))
+    let id = queue
+        .push(job)
+        .await
+        .map_err(|e| ApiError::Internal(e.to_string()))?;
+    Ok(Json(EnqueuedResponse {
+        job_id: id,
+        status: "queued",
+    }))
 }
 
 pub async fn send_custom(
     State(state): State<Arc<AppState>>,
     Json(req): Json<SendCustomRequest>,
 ) -> Result<Json<EnqueuedResponse>, ApiError> {
-    req.validate().map_err(|e| ApiError::BadRequest(e.to_string()))?;
+    req.validate()
+        .map_err(|e| ApiError::BadRequest(e.to_string()))?;
 
     let from = default_from(&state, req.from)?;
-    let locale = req.locale.unwrap_or_else(|| state.cfg.i18n.default_locale.clone());
+    let locale = req
+        .locale
+        .unwrap_or_else(|| state.cfg.i18n.default_locale.clone());
 
     let job = MailJob {
         id: Uuid::new_v4(),
@@ -131,11 +145,20 @@ pub async fn send_custom(
     };
 
     let mut queue = state.queue.clone();
-    let id = queue.push(job).await.map_err(|e| ApiError::Internal(e.to_string()))?;
-    Ok(Json(EnqueuedResponse { job_id: id, status: "queued" }))
+    let id = queue
+        .push(job)
+        .await
+        .map_err(|e| ApiError::Internal(e.to_string()))?;
+    Ok(Json(EnqueuedResponse {
+        job_id: id,
+        status: "queued",
+    }))
 }
 
-fn default_from(state: &AppState, supplied: Option<EmailAddress>) -> Result<EmailAddress, ApiError> {
+fn default_from(
+    state: &AppState,
+    supplied: Option<EmailAddress>,
+) -> Result<EmailAddress, ApiError> {
     if let Some(f) = supplied {
         return Ok(f);
     }
@@ -144,4 +167,3 @@ fn default_from(state: &AppState, supplied: Option<EmailAddress>) -> Result<Emai
         name: state.cfg.smtp.default_from_name.clone(),
     })
 }
-

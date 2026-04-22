@@ -72,13 +72,22 @@ impl SmtpSender {
             builder = builder.credentials(Credentials::new(u.clone(), p.clone()));
         }
 
-        Ok(Self { transport: builder.build() })
+        Ok(Self {
+            transport: builder.build(),
+        })
     }
 
-    pub async fn send(&self, envelope: &Envelope, rendered: &RenderedEmail) -> Result<(), SmtpError> {
+    pub async fn send(
+        &self,
+        envelope: &Envelope,
+        rendered: &RenderedEmail,
+    ) -> Result<(), SmtpError> {
         let msg = build_message(envelope, rendered)?;
         debug!(to = ?envelope.to.iter().map(|a| &a.email).collect::<Vec<_>>(), subject = %rendered.subject, "dispatching email");
-        self.transport.send(msg).await.map_err(|e| SmtpError::Transport(e.to_string()))?;
+        self.transport
+            .send(msg)
+            .await
+            .map_err(|e| SmtpError::Transport(e.to_string()))?;
         Ok(())
     }
 }
@@ -101,9 +110,12 @@ fn build_message(envelope: &Envelope, rendered: &RenderedEmail) -> Result<Messag
     }
 
     let mut html_alt = MultiPart::alternative().singlepart(
-        SinglePart::builder()
-            .header(ContentType::TEXT_PLAIN)
-            .body(rendered.text.clone().unwrap_or_else(|| fallback_text(&rendered.html))),
+        SinglePart::builder().header(ContentType::TEXT_PLAIN).body(
+            rendered
+                .text
+                .clone()
+                .unwrap_or_else(|| fallback_text(&rendered.html)),
+        ),
     );
     html_alt = html_alt.singlepart(
         SinglePart::builder()
@@ -119,10 +131,9 @@ fn build_message(envelope: &Envelope, rendered: &RenderedEmail) -> Result<Messag
             let decoded = base64::engine::general_purpose::STANDARD
                 .decode(&att.content_base64)
                 .map_err(|e| SmtpError::Base64(e.to_string()))?;
-            let ct: ContentType = att
-                .content_type
-                .parse()
-                .map_err(|_| SmtpError::Build(format!("invalid content-type: {}", att.content_type)))?;
+            let ct: ContentType = att.content_type.parse().map_err(|_| {
+                SmtpError::Build(format!("invalid content-type: {}", att.content_type))
+            })?;
             let part = match &att.inline_cid {
                 Some(cid) => LettreAttachment::new_inline(cid.clone()).body(decoded, ct),
                 None => LettreAttachment::new(att.filename.clone()).body(decoded, ct),

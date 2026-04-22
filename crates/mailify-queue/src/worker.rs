@@ -56,7 +56,10 @@ pub struct WorkerDeps {
 }
 
 impl QueueRuntime {
-    pub async fn init(app_cfg: &AppConfig, deps: WorkerDeps) -> Result<(Self, QueueHandle), QueueError> {
+    pub async fn init(
+        app_cfg: &AppConfig,
+        deps: WorkerDeps,
+    ) -> Result<(Self, QueueHandle), QueueError> {
         let pool = PgPoolOptions::new()
             .max_connections(app_cfg.database.max_connections)
             .min_connections(app_cfg.database.min_connections)
@@ -68,7 +71,9 @@ impl QueueRuntime {
             .map_err(|e| QueueError::Migrate(e.to_string()))?;
 
         let storage = PostgresStorage::new(pool.clone());
-        let handle = QueueHandle { storage: storage.clone() };
+        let handle = QueueHandle {
+            storage: storage.clone(),
+        };
 
         Ok((
             Self {
@@ -82,7 +87,10 @@ impl QueueRuntime {
     }
 
     /// Spawn workers. Returns when shutdown signal received.
-    pub async fn run(self, shutdown: tokio_util::sync::CancellationToken) -> Result<(), QueueError> {
+    pub async fn run(
+        self,
+        shutdown: tokio_util::sync::CancellationToken,
+    ) -> Result<(), QueueError> {
         let deps = self.deps.clone();
         let concurrency = self.cfg.worker_concurrency;
         let retries = self.cfg.max_retries;
@@ -141,7 +149,11 @@ async fn process(job: MailJob, deps: Arc<WorkerDeps>) -> Result<(), String> {
         MailJobKind::Registered { template_id } => renderer
             .render_registered(template_id, &ctx, job.subject_override.as_deref())
             .map_err(|e| e.to_string())?,
-        MailJobKind::Custom { html, subject, text } => renderer
+        MailJobKind::Custom {
+            html,
+            subject,
+            text,
+        } => renderer
             .render_raw(
                 html,
                 job.subject_override.as_deref().unwrap_or(subject),
@@ -166,7 +178,10 @@ async fn process(job: MailJob, deps: Arc<WorkerDeps>) -> Result<(), String> {
         None => deps.default_sender.clone(),
     };
 
-    sender.send(&envelope, &rendered).await.map_err(|e| e.to_string())?;
+    sender
+        .send(&envelope, &rendered)
+        .await
+        .map_err(|e| e.to_string())?;
     info!(job_id = %job.id, "mail sent");
     Ok(())
 }

@@ -22,7 +22,9 @@ pub fn hash_api_key(plaintext: &str) -> Result<String, ApiKeyError> {
 
 pub fn verify_api_key(plaintext: &str, stored_hash: &str) -> Result<bool, ApiKeyError> {
     let parsed = PasswordHash::new(stored_hash).map_err(|e| ApiKeyError::Verify(e.to_string()))?;
-    Ok(Argon2::default().verify_password(plaintext.as_bytes(), &parsed).is_ok())
+    Ok(Argon2::default()
+        .verify_password(plaintext.as_bytes(), &parsed)
+        .is_ok())
 }
 
 #[cfg(test)]

@@ -14,15 +14,25 @@ use tower::ServiceExt;
 async fn health_endpoint_returns_ok() {
     // Minimal router exposing only the public /health route — keeps this test independent
     // of the full app state.
-    let app = axum::Router::new().route("/health", axum::routing::get(mailify_api::routes::health::health));
+    let app = axum::Router::new().route(
+        "/health",
+        axum::routing::get(mailify_api::routes::health::health),
+    );
 
     let response = app
-        .oneshot(Request::builder().uri("/health").body(Body::empty()).unwrap())
+        .oneshot(
+            Request::builder()
+                .uri("/health")
+                .body(Body::empty())
+                .unwrap(),
+        )
         .await
         .unwrap();
 
     assert_eq!(response.status(), StatusCode::OK);
-    let body = axum::body::to_bytes(response.into_body(), 1024).await.unwrap();
+    let body = axum::body::to_bytes(response.into_body(), 1024)
+        .await
+        .unwrap();
     let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
     assert_eq!(json["status"], "ok");
     assert_eq!(json["service"], "mailify");

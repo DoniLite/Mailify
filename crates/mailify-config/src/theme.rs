@@ -54,8 +54,10 @@ impl Default for Theme {
                 success: "#16a34a".into(),
             },
             fonts: ThemeFonts {
-                body: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif".into(),
-                heading: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif".into(),
+                body: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif"
+                    .into(),
+                heading: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif"
+                    .into(),
             },
             radius: "8px".into(),
             footer_text: None,

@@ -58,7 +58,9 @@ impl MailJob {
         Self {
             id: Uuid::new_v4(),
             priority: Priority::Normal,
-            kind: MailJobKind::Registered { template_id: template_id.into() },
+            kind: MailJobKind::Registered {
+                template_id: template_id.into(),
+            },
             from,
             to,
             cc: vec![],
