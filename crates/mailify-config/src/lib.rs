@@ -74,7 +74,7 @@ pub struct AuthConfig {
     pub jwt_secret: String,
     pub jwt_issuer: String,
     pub jwt_ttl_secs: u64,
-    /// API keys (argon2 hashes), key = identifier, value = hash.
+    /// API keys (argon2 hashes), key = identifier, value = hash.    make hash-key KEY=CHANGE_ME_IN_PRODUCTION
     #[serde(default)]
     pub api_keys: std::collections::HashMap<String, String>,
 }
@@ -203,9 +203,10 @@ fn load_dotenv() {
     }
 
     if let Ok(explicit) = std::env::var("MAILIFY_DOTENV_PATH") {
-        match dotenvy::from_path(&explicit) {
-            Ok(()) => tracing::info!(path = %explicit, "loaded dotenv from MAILIFY_DOTENV_PATH"),
-            Err(e) => tracing::warn!(path = %explicit, error = %e, "MAILIFY_DOTENV_PATH failed"),
+        if let Err(e) = load_dotenv_from_file(&explicit) {
+            tracing::warn!(path = %explicit, error = %e, "MAILIFY_DOTENV_PATH failed");
+        } else {
+            tracing::info!(path = %explicit, "loaded dotenv from MAILIFY_DOTENV_PATH");
         }
         return;
     }
@@ -219,8 +220,44 @@ fn load_dotenv() {
         "../../.env".to_string(),
     ];
     for file in &candidates {
-        if let Ok(path) = dotenvy::from_filename(file) {
-            tracing::debug!(file = %path.display(), "dotenv loaded");
+        if let Ok(()) = load_dotenv_from_file(file) {
+            tracing::debug!(file = %file, "dotenv loaded");
+            break;
         }
     }
+}
+
+fn load_dotenv_from_file(path: &str) -> std::result::Result<(), String> {
+    use std::fs;
+
+    let content = fs::read_to_string(path).map_err(|e| e.to_string())?;
+    for (i, raw) in content.lines().enumerate() {
+        let line = raw.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        let mut parts = line.splitn(2, '=');
+        let key = parts
+            .next()
+            .ok_or_else(|| format!("invalid dotenv line {}", i + 1))?
+            .trim();
+        let mut val = parts
+            .next()
+            .ok_or_else(|| format!("invalid dotenv line {}", i + 1))?
+            .trim()
+            .to_string();
+
+        // Strip surrounding single or double quotes if present (preserve inner $)
+        if val.len() >= 2 {
+            let bytes = val.as_bytes();
+            if (bytes[0] == b'"' && bytes[val.len() - 1] == b'"')
+                || (bytes[0] == b'\'' && bytes[val.len() - 1] == b'\'')
+            {
+                val = val[1..val.len() - 1].to_string();
+            }
+        }
+
+        std::env::set_var(key, val);
+    }
+    Ok(())
 }

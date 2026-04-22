@@ -12,9 +12,13 @@ mailify-config = { path = "../mailify-config" }
 serde = { workspace = true }
 jsonwebtoken = { workspace = true }
 argon2 = { workspace = true }
+rand_core = { version = "0.6", features = ["getrandom"] }
 thiserror = { workspace = true }
 chrono = { workspace = true }
 axum = { workspace = true }
 http = { workspace = true }
 tracing = { workspace = true }
 async-trait = { workspace = true }
+
+[dev-dependencies]
+dotenvy = { workspace = true }

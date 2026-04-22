@@ -17,6 +17,8 @@ async fn main() -> anyhow::Result<()> {
 
     info!(version = env!("CARGO_PKG_VERSION"), "starting mailify");
 
+    info!(api_key_ids = ?cfg.auth.api_keys.keys().cloned().collect::<Vec<_>>(), "loaded auth api_key ids");
+
     let registry = Arc::new(TemplateRegistry::load_from_dir(
         &cfg.templates.path,
         cfg.i18n.clone(),
