@@ -4,10 +4,11 @@ use axum::{extract::State, Json};
 use mailify_auth::verify_api_key;
 use serde::{Deserialize, Serialize};
 use tracing::warn;
+use utoipa::ToSchema;
 
 use crate::{error::ApiError, state::AppState};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, ToSchema)]
 pub struct IssueTokenRequest {
     pub api_key_id: String,
     pub api_key: String,
@@ -15,13 +16,24 @@ pub struct IssueTokenRequest {
     pub scopes: Vec<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct IssueTokenResponse {
     pub access_token: String,
-    pub token_type: &'static str,
+    pub token_type: String,
     pub expires_in: u64,
 }
 
+/// Exchange an API key for a short-lived JWT.
+#[utoipa::path(
+    post,
+    path = "/auth/token",
+    tag = "auth",
+    request_body = IssueTokenRequest,
+    responses(
+        (status = 200, description = "JWT issued", body = IssueTokenResponse),
+        (status = 401, description = "Unknown api_key_id or wrong api_key")
+    )
+)]
 pub async fn issue_token(
     State(state): State<Arc<AppState>>,
     Json(body): Json<IssueTokenRequest>,
@@ -45,7 +57,7 @@ pub async fn issue_token(
 
     Ok(Json(IssueTokenResponse {
         access_token: token,
-        token_type: "Bearer",
+        token_type: "Bearer".into(),
         expires_in: state.cfg.auth.jwt_ttl_secs,
     }))
 }

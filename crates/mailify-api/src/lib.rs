@@ -1,4 +1,5 @@
 pub mod error;
+pub mod openapi;
 pub mod routes;
 pub mod state;
 
@@ -9,6 +10,8 @@ use mailify_auth::{middleware::AuthLayer, require_jwt};
 use tower_http::{
     cors::CorsLayer, limit::RequestBodyLimitLayer, timeout::TimeoutLayer, trace::TraceLayer,
 };
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 pub use state::AppState;
 
@@ -27,6 +30,11 @@ pub fn build_router(state: AppState) -> Router {
             axum::routing::post(routes::mail::send_custom),
         )
         .route("/templates", get(routes::templates::list))
+        .route(
+            "/templates/:id/preview",
+            get(routes::templates::preview_get).post(routes::templates::preview_post),
+        )
+        .route("/config", get(routes::config::get_config))
         .route_layer(middleware::from_fn_with_state(auth_layer, require_jwt));
 
     let public = Router::new()
@@ -36,10 +44,14 @@ pub fn build_router(state: AppState) -> Router {
             axum::routing::post(routes::auth::issue_token),
         );
 
+    let swagger = SwaggerUi::new("/swagger-ui")
+        .url("/api-docs/openapi.json", openapi::ApiDoc::openapi());
+
     Router::new()
         .merge(public)
         .merge(protected)
         .with_state(Arc::new(state))
+        .merge(swagger)
         .layer(TraceLayer::new_for_http())
         .layer(CorsLayer::very_permissive())
         .layer(RequestBodyLimitLayer::new(10 * 1024 * 1024))

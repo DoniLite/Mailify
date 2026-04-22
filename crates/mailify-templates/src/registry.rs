@@ -5,6 +5,7 @@ use std::{
 };
 
 use mailify_config::I18nConfig;
+use serde::{Deserialize, Serialize};
 use tracing::{debug, warn};
 
 #[derive(Debug, thiserror::Error)]
@@ -34,11 +35,20 @@ pub struct TemplateAssets {
     pub text: Option<String>,
 }
 
+/// Entry from `catalog.json` emitted by the templates-parser generator.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CatalogEntry {
+    pub id: String,
+    pub category: String,
+    pub locales: Vec<String>,
+}
+
 /// In-memory registry of compiled templates. Populated at boot.
 #[derive(Debug)]
 pub struct TemplateRegistry {
     inner: HashMap<TemplateKey, TemplateAssets>,
     i18n: I18nConfig,
+    catalog: HashMap<String, CatalogEntry>,
 }
 
 impl TemplateRegistry {
@@ -46,6 +56,7 @@ impl TemplateRegistry {
         Self {
             inner: HashMap::new(),
             i18n,
+            catalog: HashMap::new(),
         }
     }
 
@@ -125,7 +136,29 @@ impl TemplateRegistry {
             }
         }
 
+        // Optional catalog sidecar produced by the templates-parser generator.
+        let catalog_path = root.join("catalog.json");
+        if let Ok(bytes) = fs::read(&catalog_path) {
+            match serde_json::from_slice::<Vec<CatalogEntry>>(&bytes) {
+                Ok(entries) => {
+                    for e in entries {
+                        registry.catalog.insert(e.id.clone(), e);
+                    }
+                    debug!(count = registry.catalog.len(), "catalog loaded");
+                }
+                Err(e) => warn!(error = %e, "catalog.json present but failed to parse — ignoring"),
+            }
+        }
+
         Ok(registry)
+    }
+
+    pub fn catalog_entry(&self, id: &str) -> Option<&CatalogEntry> {
+        self.catalog.get(id)
+    }
+
+    pub fn catalog(&self) -> impl Iterator<Item = &CatalogEntry> {
+        self.catalog.values()
     }
 
     /// Resolve the best-matching asset for a requested locale using the configured fallback chain.

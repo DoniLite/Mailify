@@ -1,7 +1,19 @@
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 
 #[derive(
-    Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize,
+    Debug,
+    Default,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    Serialize,
+    Deserialize,
+    ToSchema,
 )]
 #[serde(rename_all = "lowercase")]
 pub enum Priority {

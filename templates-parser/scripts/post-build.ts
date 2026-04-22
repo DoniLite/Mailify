@@ -36,7 +36,7 @@ function decodeEntities(s: string): string {
 
 function decodeMinijinjaSpans(html: string): string {
   // {{ ... }} and {% ... %}
-  return html.replace(/\{\{([^}]+)\}\}|\{%([^%]+)%\}/g, (match, expr, stmt) => {
+  return html.replace(/\{\{([^}]+)\}\}|\{%([^%]+)%\}/g, (_match, expr, stmt) => {
     if (expr !== undefined) return `{{${decodeEntities(expr)}}}`;
     return `{%${decodeEntities(stmt)}%}`;
   });
@@ -76,6 +76,11 @@ for (const entry of readdirSync(EMAILS)) {
       copied++;
     }
   }
+}
+
+const catalogSrc = join(EMAILS, "catalog.json");
+if (existsSync(catalogSrc)) {
+  cpSync(catalogSrc, join(OUT, "catalog.json"));
 }
 
 console.log(`Rewrote minijinja spans in ${rewrote} html files.`);

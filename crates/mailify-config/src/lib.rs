@@ -168,8 +168,19 @@ impl Default for AppConfig {
 }
 
 impl AppConfig {
-    /// Load config: defaults → optional TOML → env vars prefixed `MAILIFY_` (nested via `__`).
+    /// Load config: dotenv → defaults → optional TOML → env vars prefixed `MAILIFY_` (nested via `__`).
+    ///
+    /// Dotenv loading order (first found wins, does not override already-set vars):
+    ///   1. `MAILIFY_DOTENV_PATH` (explicit file)
+    ///   2. `.env.<MAILIFY_ENV>.local`
+    ///   3. `.env.<MAILIFY_ENV>`
+    ///   4. `.env.local`
+    ///   5. `.env`
+    ///
+    /// Disable by setting `MAILIFY_DOTENV=false`.
     pub fn load() -> Result<Self> {
+        load_dotenv();
+
         let mut fig = Figment::from(Serialized::defaults(AppConfig::default()));
 
         if let Ok(path) = std::env::var("MAILIFY_CONFIG") {
@@ -180,5 +191,36 @@ impl AppConfig {
 
         let cfg: AppConfig = fig.extract()?;
         Ok(cfg)
+    }
+}
+
+fn load_dotenv() {
+    if std::env::var("MAILIFY_DOTENV")
+        .map(|v| v.eq_ignore_ascii_case("false") || v == "0")
+        .unwrap_or(false)
+    {
+        return;
+    }
+
+    if let Ok(explicit) = std::env::var("MAILIFY_DOTENV_PATH") {
+        match dotenvy::from_path(&explicit) {
+            Ok(()) => tracing::info!(path = %explicit, "loaded dotenv from MAILIFY_DOTENV_PATH"),
+            Err(e) => tracing::warn!(path = %explicit, error = %e, "MAILIFY_DOTENV_PATH failed"),
+        }
+        return;
+    }
+
+    let env_name = std::env::var("MAILIFY_ENV").unwrap_or_else(|_| "development".to_string());
+    let candidates = [
+        format!(".env.{env_name}.local"),
+        format!(".env.{env_name}"),
+        ".env.local".to_string(),
+        ".env".to_string(),
+        "../../.env".to_string(),
+    ];
+    for file in &candidates {
+        if let Ok(path) = dotenvy::from_filename(file) {
+            tracing::debug!(file = %path.display(), "dotenv loaded");
+        }
     }
 }

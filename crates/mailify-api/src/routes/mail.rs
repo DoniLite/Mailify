@@ -9,12 +9,13 @@ use mailify_core::{
 use mailify_queue::job::{MailJob, MailJobKind};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use utoipa::ToSchema;
 use uuid::Uuid;
 use validator::Validate;
 
 use crate::{error::ApiError, state::AppState};
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct SendRegisteredRequest {
     pub template_id: String,
     pub from: Option<EmailAddress>,
@@ -37,7 +38,7 @@ pub struct SendRegisteredRequest {
     pub headers: std::collections::HashMap<String, String>,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct SendCustomRequest {
     pub html: String,
     pub subject: String,
@@ -63,12 +64,25 @@ pub struct SendCustomRequest {
     pub headers: std::collections::HashMap<String, String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, ToSchema)]
 pub struct EnqueuedResponse {
     pub job_id: Uuid,
-    pub status: &'static str,
+    pub status: String,
 }
 
+/// Queue an email using a built-in template (see `GET /templates` for available ids).
+#[utoipa::path(
+    post,
+    path = "/mail/send",
+    tag = "mail",
+    request_body = SendRegisteredRequest,
+    security(("bearer_jwt" = [])),
+    responses(
+        (status = 200, description = "Job queued", body = EnqueuedResponse),
+        (status = 400, description = "Validation error"),
+        (status = 401, description = "Missing or invalid JWT"),
+    )
+)]
 pub async fn send_registered(
     State(state): State<Arc<AppState>>,
     Json(req): Json<SendRegisteredRequest>,
@@ -107,10 +121,24 @@ pub async fn send_registered(
         .map_err(|e| ApiError::Internal(e.to_string()))?;
     Ok(Json(EnqueuedResponse {
         job_id: id,
-        status: "queued",
+        status: "queued".into(),
     }))
 }
 
+/// Queue an email using caller-supplied HTML/subject + optional per-request SMTP override.
+/// Override credentials stay in memory only for the job's lifetime — never persisted beyond apalis' job record.
+#[utoipa::path(
+    post,
+    path = "/mail/send-custom",
+    tag = "mail",
+    request_body = SendCustomRequest,
+    security(("bearer_jwt" = [])),
+    responses(
+        (status = 200, description = "Job queued", body = EnqueuedResponse),
+        (status = 400, description = "Validation error"),
+        (status = 401, description = "Missing or invalid JWT"),
+    )
+)]
 pub async fn send_custom(
     State(state): State<Arc<AppState>>,
     Json(req): Json<SendCustomRequest>,
@@ -151,7 +179,7 @@ pub async fn send_custom(
         .map_err(|e| ApiError::Internal(e.to_string()))?;
     Ok(Json(EnqueuedResponse {
         job_id: id,
-        status: "queued",
+        status: "queued".into(),
     }))
 }
 

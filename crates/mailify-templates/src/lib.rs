@@ -12,5 +12,5 @@
 pub mod registry;
 pub mod renderer;
 
-pub use registry::{TemplateKey, TemplateRegistry, TemplateRegistryError};
+pub use registry::{CatalogEntry, TemplateKey, TemplateRegistry, TemplateRegistryError};
 pub use renderer::{RenderContext, TemplateRenderer};

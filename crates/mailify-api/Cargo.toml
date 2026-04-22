@@ -33,6 +33,9 @@ tracing-subscriber = { workspace = true }
 uuid = { workspace = true }
 chrono = { workspace = true }
 validator = { workspace = true }
+url = "2"
+utoipa = { workspace = true }
+utoipa-swagger-ui = { workspace = true }
 
 [dev-dependencies]
 tokio = { workspace = true }
