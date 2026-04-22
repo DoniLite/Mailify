@@ -1,0 +1,2 @@
+Connexion à {{ theme.brand_name }} : {{ vars.magic_link_url }}
+Expire dans {{ vars.expires_in or '15 minutes' }}.

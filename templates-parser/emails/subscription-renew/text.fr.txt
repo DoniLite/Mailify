@@ -1,0 +1,1 @@
+Abonnement {{ vars.plan }} renouvelé. Prochain : {{ vars.next_renewal }}.

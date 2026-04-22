@@ -1,0 +1,1 @@
+Remboursement {{ vars.amount }} effectué pour la commande {{ vars.order_id }}.

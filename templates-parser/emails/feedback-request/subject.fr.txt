@@ -1,0 +1,1 @@
+Partagez votre avis sur {{ theme.brand_name }}

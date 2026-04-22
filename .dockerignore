@@ -1,0 +1,15 @@
+target/
+**/target/
+node_modules/
+**/node_modules/
+templates-parser/out/
+.git/
+.github/
+.vscode/
+.idea/
+.env
+.env.*
+!.env.example
+docker-compose*.yml
+*.md
+!README.md

@@ -1,0 +1,1 @@
+Subscription {{ vars.plan }} renewed. Next: {{ vars.next_renewal }}.

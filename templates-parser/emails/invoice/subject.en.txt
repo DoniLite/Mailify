@@ -1,0 +1,1 @@
+Invoice {{ vars.invoice_number }} from {{ theme.brand_name }}

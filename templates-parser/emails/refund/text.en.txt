@@ -1,0 +1,1 @@
+Refund {{ vars.amount }} processed for order {{ vars.order_id }}.

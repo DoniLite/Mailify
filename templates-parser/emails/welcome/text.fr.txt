@@ -1,0 +1,1 @@
+Bienvenue sur {{ theme.brand_name }} ! {{ vars.get_started_url }}

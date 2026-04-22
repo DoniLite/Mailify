@@ -1,0 +1,20 @@
+[package]
+name = "mailify-templates"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+mailify-core = { path = "../mailify-core" }
+mailify-config = { path = "../mailify-config" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+minijinja = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+once_cell = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"

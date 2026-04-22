@@ -1,0 +1,1 @@
+Votre abonnement {{ theme.brand_name }} a été renouvelé

@@ -1,0 +1,1 @@
+Paiement {{ vars.amount }} échoué. MAJ : {{ vars.billing_url }}

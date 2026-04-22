@@ -1,0 +1,1 @@
+{{ vars.period }} report: {{ vars.report_url }}

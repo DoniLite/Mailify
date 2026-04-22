@@ -1,0 +1,1 @@
+Your {{ theme.brand_name }} account has been deleted.

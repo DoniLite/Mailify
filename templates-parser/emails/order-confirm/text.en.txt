@@ -1,0 +1,1 @@
+Order {{ vars.order_id }} confirmed. Track: {{ vars.track_url }}

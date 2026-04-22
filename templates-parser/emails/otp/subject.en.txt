@@ -1,0 +1,1 @@
+{{ vars.code }} is your {{ theme.brand_name }} code

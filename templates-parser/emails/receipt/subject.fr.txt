@@ -1,0 +1,1 @@
+Reçu #{{ vars.order_id }} — {{ theme.brand_name }}

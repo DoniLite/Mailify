@@ -1,0 +1,51 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mailify
+      POSTGRES_PASSWORD: mailify
+      POSTGRES_DB: mailify
+    ports:
+      - "5432:5432"
+    volumes:
+      - mailify_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mailify -d mailify"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "true"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "true"
+
+  mailify:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    ports:
+      - "8080:8080"
+    environment:
+      MAILIFY_DATABASE__URL: postgres://mailify:mailify@postgres:5432/mailify
+      MAILIFY_SMTP__HOST: mailpit
+      MAILIFY_SMTP__PORT: "1025"
+      MAILIFY_SMTP__TLS: none
+      MAILIFY_SMTP__DEFAULT_FROM_EMAIL: no-reply@mailify.local
+      MAILIFY_AUTH__JWT_SECRET: CHANGE_ME
+      MAILIFY_OBSERVABILITY__LOG_FORMAT: json
+      RUST_LOG: info,mailify=debug
+
+volumes:
+  mailify_pg: {}

@@ -1,0 +1,24 @@
+{
+  "name": "templates-parser",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "bun run scripts/generate.ts",
+    "build": "bun run generate && email export && bun run scripts/post-build.ts",
+    "dev": "bun run generate && email dev",
+    "export": "bun run generate && email export"
+  },
+  "dependencies": {
+    "@react-email/components": "^0.5.7",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-email": "6.0.0"
+  },
+  "devDependencies": {
+    "@react-email/ui": "6.0.0",
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3"
+  }
+}

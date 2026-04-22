@@ -1,0 +1,1 @@
+[ALERTE] {{ vars.title }} : {{ vars.message }}

@@ -1,0 +1,1 @@
+{{ vars.issue_title }} — {{ vars.issue_url }}

@@ -1,0 +1,1 @@
+Welcome to {{ theme.brand_name }}, {{ vars.name or 'friend' }}!

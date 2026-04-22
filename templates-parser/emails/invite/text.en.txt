@@ -1,0 +1,1 @@
+{{ vars.inviter_name }} invited you to {{ vars.workspace_name }}: {{ vars.invite_url }}

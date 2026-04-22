@@ -1,0 +1,1 @@
+Your {{ vars.period }} report is ready

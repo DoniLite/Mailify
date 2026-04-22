@@ -1,0 +1,1 @@
+Commande {{ vars.order_id }} confirmée. Suivi : {{ vars.track_url }}

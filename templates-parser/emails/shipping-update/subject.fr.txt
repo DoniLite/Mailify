@@ -1,0 +1,1 @@
+Votre commande {{ vars.order_id }} a été expédiée

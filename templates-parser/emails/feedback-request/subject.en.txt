@@ -1,0 +1,1 @@
+Mind sharing your thoughts on {{ theme.brand_name }}?

@@ -1,0 +1,1 @@
+Facture {{ vars.invoice_number }} : {{ vars.invoice_url }}

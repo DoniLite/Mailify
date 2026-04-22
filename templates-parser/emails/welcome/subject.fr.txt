@@ -1,0 +1,1 @@
+Bienvenue sur {{ theme.brand_name }}, {{ vars.name or '' }} !

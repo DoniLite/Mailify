@@ -1,0 +1,2 @@
+Sign in to {{ theme.brand_name }}: {{ vars.magic_link_url }}
+Expires in {{ vars.expires_in or '15 minutes' }}.

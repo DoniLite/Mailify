@@ -1,0 +1,1 @@
+{{ vars.headline }} — {{ vars.learn_more_url }}

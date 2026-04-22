@@ -1,0 +1,1 @@
+Receipt {{ vars.order_id }} — {{ vars.total }} ({{ vars.date }})

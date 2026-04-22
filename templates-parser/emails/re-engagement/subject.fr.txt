@@ -1,0 +1,1 @@
+Vous nous avez manqué chez {{ theme.brand_name }}

@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "composite": false,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "strictNullChecks": true,
+    "types": ["node"]
+  },
+  "include": ["emails/**/*", "scripts/**/*"],
+  "exclude": ["node_modules", ".react-email", "out"]
+}

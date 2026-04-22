@@ -1,0 +1,1 @@
+Your password was changed on {{ vars.changed_at }}.

@@ -1,0 +1,1 @@
+Vérifiez votre email pour {{ theme.brand_name }}

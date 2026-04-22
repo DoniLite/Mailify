@@ -1,0 +1,27 @@
+/target
+Cargo.lock.old
+**/*.rs.bk
+
+# Env
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (React Email)
+node_modules/
+templates-parser/out/
+templates-parser/.react-email/
+templates-parser/emails/catalog.json
+
+# Logs
+*.log

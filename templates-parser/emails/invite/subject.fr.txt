@@ -1,0 +1,1 @@
+Rejoindre {{ vars.workspace_name }} sur {{ theme.brand_name }}

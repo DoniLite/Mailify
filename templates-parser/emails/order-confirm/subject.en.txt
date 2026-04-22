@@ -1,0 +1,1 @@
+Your order {{ vars.order_id }} is confirmed
