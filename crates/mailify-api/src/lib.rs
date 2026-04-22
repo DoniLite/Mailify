@@ -44,8 +44,8 @@ pub fn build_router(state: AppState) -> Router {
             axum::routing::post(routes::auth::issue_token),
         );
 
-    let swagger = SwaggerUi::new("/swagger-ui")
-        .url("/api-docs/openapi.json", openapi::ApiDoc::openapi());
+    let swagger =
+        SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", openapi::ApiDoc::openapi());
 
     Router::new()
         .merge(public)
