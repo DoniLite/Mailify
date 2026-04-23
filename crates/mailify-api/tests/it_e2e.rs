@@ -167,7 +167,7 @@ async fn send_custom_via_http_delivers_to_mailpit() {
         .await
         .unwrap();
     let resp: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    assert_eq!(resp["status"], "queued");
+    assert_eq!(resp["status"], "pending");
 
     // Wait for mailpit delivery.
     let search_url = format!(
