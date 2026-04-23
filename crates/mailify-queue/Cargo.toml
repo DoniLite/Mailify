@@ -7,10 +7,10 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-mailify-core = { path = "../mailify-core" }
-mailify-config = { path = "../mailify-config" }
-mailify-smtp = { path = "../mailify-smtp" }
-mailify-templates = { path = "../mailify-templates" }
+mailify-core = { path = "../mailify-core", version = "0.1.2" }
+mailify-config = { path = "../mailify-config", version = "0.1.2" }
+mailify-smtp = { path = "../mailify-smtp", version = "0.1.2" }
+mailify-templates = { path = "../mailify-templates", version = "0.1.2" }
 apalis = { workspace = true }
 apalis-sql = { workspace = true }
 sqlx = { workspace = true }

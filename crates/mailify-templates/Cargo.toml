@@ -7,8 +7,8 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-mailify-core = { path = "../mailify-core" }
-mailify-config = { path = "../mailify-config" }
+mailify-core = { path = "../mailify-core", version = "0.1.2" }
+mailify-config = { path = "../mailify-config", version = "0.1.2" }
 serde = { workspace = true }
 serde_json = { workspace = true }
 minijinja = { workspace = true }

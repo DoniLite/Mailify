@@ -11,12 +11,12 @@ name = "mailify"
 path = "src/main.rs"
 
 [dependencies]
-mailify-core = { path = "../mailify-core" }
-mailify-config = { path = "../mailify-config" }
-mailify-templates = { path = "../mailify-templates" }
-mailify-smtp = { path = "../mailify-smtp" }
-mailify-queue = { path = "../mailify-queue" }
-mailify-auth = { path = "../mailify-auth" }
+mailify-core = { path = "../mailify-core", version = "0.1.2" }
+mailify-config = { path = "../mailify-config", version = "0.1.2" }
+mailify-templates = { path = "../mailify-templates", version = "0.1.2" }
+mailify-smtp = { path = "../mailify-smtp", version = "0.1.2" }
+mailify-queue = { path = "../mailify-queue", version = "0.1.2" }
+mailify-auth = { path = "../mailify-auth", version = "0.1.2" }
 
 axum = { workspace = true }
 tower = { workspace = true }
@@ -43,8 +43,8 @@ tower = { workspace = true }
 tokio-util = { workspace = true }
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 urlencoding = "2"
-mailify-auth = { path = "../mailify-auth" }
-mailify-queue = { path = "../mailify-queue" }
-mailify-smtp = { path = "../mailify-smtp" }
-mailify-templates = { path = "../mailify-templates" }
-mailify-core = { path = "../mailify-core" }
+mailify-auth = { path = "../mailify-auth", version = "0.1.2" }
+mailify-queue = { path = "../mailify-queue", version = "0.1.2" }
+mailify-smtp = { path = "../mailify-smtp", version = "0.1.2" }
+mailify-templates = { path = "../mailify-templates", version = "0.1.2" }
+mailify-core = { path = "../mailify-core", version = "0.1.2" }

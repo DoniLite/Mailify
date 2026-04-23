@@ -1,6 +1,10 @@
 //! Central configuration loader.
 //!
-//! Precedence (lowest → highest): defaults → optional TOML file (`MAILIFY_CONFIG` env) → env vars (`MAILIFY_*`).
+//! Precedence (lowest → highest): defaults → auto-discovered TOML file → env vars (`MAILIFY_*`).
+//!
+//! TOML discovery (first match wins): `$MAILIFY_CONFIG` → `./Mailify.toml` →
+//! `$XDG_CONFIG_HOME/mailify/config.toml` (fallback `$HOME/.config/mailify/config.toml` on Unix,
+//! `%APPDATA%\mailify\config.toml` on Windows) → `/etc/mailify/config.toml` (Unix).
 
 pub mod theme;
 
@@ -179,7 +183,14 @@ impl Default for AppConfig {
 }
 
 impl AppConfig {
-    /// Load config: dotenv → defaults → optional TOML → env vars prefixed `MAILIFY_` (nested via `__`).
+    /// Load config: dotenv → defaults → auto-discovered TOML → env vars prefixed `MAILIFY_` (nested via `__`).
+    ///
+    /// TOML discovery order (first found wins):
+    ///   1. `MAILIFY_CONFIG` env var (explicit file path)
+    ///   2. `./Mailify.toml` in current working directory
+    ///   3. `$XDG_CONFIG_HOME/mailify/config.toml` (or `$HOME/.config/mailify/config.toml` on Unix,
+    ///      `%APPDATA%\mailify\config.toml` on Windows)
+    ///   4. `/etc/mailify/config.toml` (Unix system-wide, last resort)
     ///
     /// Dotenv loading order (first found wins, does not override already-set vars):
     ///   1. `MAILIFY_DOTENV_PATH` (explicit file)
@@ -188,13 +199,13 @@ impl AppConfig {
     ///   4. `.env.local`
     ///   5. `.env`
     ///
-    /// Disable by setting `MAILIFY_DOTENV=false`.
+    /// Disable dotenv by setting `MAILIFY_DOTENV=false`.
     pub fn load() -> Result<Self> {
         load_dotenv();
 
         let mut fig = Figment::from(Serialized::defaults(AppConfig::default()));
 
-        if let Ok(path) = std::env::var("MAILIFY_CONFIG") {
+        if let Some(path) = discover_config_file() {
             fig = fig.merge(Toml::file(path));
         }
 
@@ -203,6 +214,65 @@ impl AppConfig {
         let cfg: AppConfig = fig.extract()?;
         Ok(cfg)
     }
+}
+
+/// Resolve the TOML config file to load. Returns `None` when no candidate exists.
+///
+/// Searches in this order, returning the first existing path:
+///   1. `$MAILIFY_CONFIG`
+///   2. `./Mailify.toml`
+///   3. Per-user config dir: `$XDG_CONFIG_HOME/mailify/config.toml`, else
+///      `$HOME/.config/mailify/config.toml` on Unix, `%APPDATA%\mailify\config.toml` on Windows
+///   4. `/etc/mailify/config.toml` on Unix
+fn discover_config_file() -> Option<PathBuf> {
+    config_candidates().into_iter().find(|c| c.is_file())
+}
+
+fn config_candidates() -> Vec<PathBuf> {
+    let mut out = Vec::new();
+
+    if let Ok(explicit) = std::env::var("MAILIFY_CONFIG") {
+        out.push(PathBuf::from(explicit));
+    }
+
+    out.push(PathBuf::from("Mailify.toml"));
+
+    if let Some(user_dir) = user_config_dir() {
+        out.push(user_dir.join("mailify").join("config.toml"));
+    }
+
+    #[cfg(unix)]
+    out.push(PathBuf::from("/etc/mailify/config.toml"));
+
+    out
+}
+
+fn user_config_dir() -> Option<PathBuf> {
+    if let Ok(xdg) = std::env::var("XDG_CONFIG_HOME") {
+        if !xdg.is_empty() {
+            return Some(PathBuf::from(xdg));
+        }
+    }
+
+    #[cfg(unix)]
+    {
+        if let Ok(home) = std::env::var("HOME") {
+            if !home.is_empty() {
+                return Some(PathBuf::from(home).join(".config"));
+            }
+        }
+    }
+
+    #[cfg(windows)]
+    {
+        if let Ok(appdata) = std::env::var("APPDATA") {
+            if !appdata.is_empty() {
+                return Some(PathBuf::from(appdata));
+            }
+        }
+    }
+
+    None
 }
 
 fn load_dotenv() {
@@ -271,4 +341,42 @@ fn load_dotenv_from_file(path: &str) -> std::result::Result<(), String> {
         std::env::set_var(key, val);
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn candidates_include_cwd_and_explicit() {
+        // SAFETY: test-only env mutation; other discovery tests are skipped to avoid races.
+        let prev = std::env::var("MAILIFY_CONFIG").ok();
+        unsafe {
+            std::env::set_var("MAILIFY_CONFIG", "/custom/path.toml");
+        }
+        let c = config_candidates();
+        assert_eq!(
+            c.first().map(PathBuf::as_path),
+            Some(std::path::Path::new("/custom/path.toml"))
+        );
+        assert!(c.iter().any(|p| p == std::path::Path::new("Mailify.toml")));
+
+        match prev {
+            Some(v) => unsafe { std::env::set_var("MAILIFY_CONFIG", v) },
+            None => unsafe { std::env::remove_var("MAILIFY_CONFIG") },
+        }
+    }
+
+    #[test]
+    fn user_config_dir_prefers_xdg() {
+        let prev = std::env::var("XDG_CONFIG_HOME").ok();
+        unsafe {
+            std::env::set_var("XDG_CONFIG_HOME", "/xdg/override");
+        }
+        assert_eq!(user_config_dir(), Some(PathBuf::from("/xdg/override")));
+        match prev {
+            Some(v) => unsafe { std::env::set_var("XDG_CONFIG_HOME", v) },
+            None => unsafe { std::env::remove_var("XDG_CONFIG_HOME") },
+        }
+    }
 }
