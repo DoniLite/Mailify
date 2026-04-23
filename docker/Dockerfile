@@ -12,7 +12,7 @@ RUN bun run build
 # ─────────────────────────── 2. Rust builder ───────────────────────────
 FROM rust:1.88-slim AS rs-builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    pkg-config libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
+    pkg-config libssl-dev ca-certificates curl unzip build-essential && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /w
 

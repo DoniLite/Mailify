@@ -77,6 +77,16 @@ pub struct AuthConfig {
     /// API keys (argon2 hashes), key = identifier, value = hash.    make hash-key KEY=CHANGE_ME_IN_PRODUCTION
     #[serde(default)]
     pub api_keys: std::collections::HashMap<String, String>,
+    /// When true (default) and `api_keys` is empty at boot, the server generates
+    /// an ephemeral API key, prints the plaintext + the env line to paste, and keeps
+    /// the hash in memory for the current session. Set `false` to disable (e.g. when
+    /// intentionally running with no keys).
+    #[serde(default = "default_true")]
+    pub bootstrap: bool,
+}
+
+fn default_true() -> bool {
+    true
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -143,6 +153,7 @@ impl Default for AppConfig {
                 jwt_issuer: "mailify".into(),
                 jwt_ttl_secs: 3600,
                 api_keys: Default::default(),
+                bootstrap: true,
             },
             queue: QueueConfig {
                 worker_concurrency: 4,

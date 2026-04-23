@@ -1,7 +1,9 @@
 use std::sync::Arc;
 
 use mailify_api::{build_router, AppState};
-use mailify_auth::JwtIssuer;
+use mailify_auth::{
+    generate_bootstrap_key, generate_jwt_secret, print_bootstrap_banner, JwtIssuer,
+};
 use mailify_config::{AppConfig, LogFormat};
 use mailify_queue::{worker::WorkerDeps, QueueRuntime};
 use mailify_smtp::SmtpSender;
@@ -12,10 +14,12 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let cfg = AppConfig::load()?;
+    let mut cfg = AppConfig::load()?;
     init_tracing(&cfg);
 
     info!(version = env!("CARGO_PKG_VERSION"), "starting mailify");
+
+    maybe_bootstrap_auth(&mut cfg);
 
     info!(api_key_ids = ?cfg.auth.api_keys.keys().cloned().collect::<Vec<_>>(), "loaded auth api_key ids");
 
@@ -80,15 +84,58 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
+const DEFAULT_JWT_SECRET: &str = "CHANGE_ME_IN_PRODUCTION";
+const BOOTSTRAP_KEY_ID: &str = "DEFAULT";
+
+fn maybe_bootstrap_auth(cfg: &mut AppConfig) {
+    if !cfg.auth.bootstrap || !cfg.auth.api_keys.is_empty() {
+        return;
+    }
+
+    let key = match generate_bootstrap_key(BOOTSTRAP_KEY_ID) {
+        Ok(k) => k,
+        Err(e) => {
+            error!(error = %e, "failed to generate bootstrap api key");
+            return;
+        }
+    };
+
+    let jwt_override = if cfg.auth.jwt_secret == DEFAULT_JWT_SECRET {
+        let secret = generate_jwt_secret();
+        cfg.auth.jwt_secret = secret.clone();
+        Some(secret)
+    } else {
+        None
+    };
+
+    cfg.auth.api_keys.insert(key.id.clone(), key.hash.clone());
+
+    print_bootstrap_banner(&key, jwt_override.as_deref());
+}
+
 fn init_tracing(cfg: &AppConfig) {
-    let filter =
-        EnvFilter::try_new(&cfg.observability.log_level).unwrap_or_else(|_| EnvFilter::new("info"));
+    // Precedence: RUST_LOG (standard) > cfg.observability.log_level > built-in fallback.
+    let filter = EnvFilter::try_from_default_env()
+        .or_else(|_| EnvFilter::try_new(&cfg.observability.log_level))
+        .unwrap_or_else(|_| {
+            EnvFilter::new(
+                "info,mailify=debug,mailify_api=debug,mailify_queue=debug,tower_http=info",
+            )
+        });
     let registry = tracing_subscriber::registry().with(filter);
     match cfg.observability.log_format {
         LogFormat::Json => registry
             .with(tracing_subscriber::fmt::layer().json())
             .init(),
-        LogFormat::Pretty => registry.with(tracing_subscriber::fmt::layer()).init(),
+        LogFormat::Pretty => registry
+            .with(
+                tracing_subscriber::fmt::layer()
+                    .with_target(true)
+                    .with_thread_ids(false)
+                    .with_level(true)
+                    .compact(),
+            )
+            .init(),
     }
 }
 
