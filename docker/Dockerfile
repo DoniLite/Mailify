@@ -9,17 +9,33 @@ RUN bun install --frozen-lockfile
 COPY templates-parser/ ./
 RUN bun run build
 
-# ─────────────────────────── 2. Rust builder ───────────────────────────
-FROM rust:1.88-slim AS rs-builder
+# ─────────────────────────── 2a. Rust chef base ───────────────────────────
+FROM rust:1.88-slim AS chef
 RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config libssl-dev ca-certificates curl unzip build-essential && rm -rf /var/lib/apt/lists/*
-
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    cargo install cargo-chef --locked --version ^0.1
 WORKDIR /w
 
-# Dependency-cache trick: copy manifests first, build stub crates so deps get cached.
+# ─────────────────────────── 2b. Planner: compute dep recipe ───────────────────────────
+FROM chef AS planner
 COPY Cargo.toml Cargo.lock* ./
 COPY crates/ ./crates/
+RUN cargo chef prepare --recipe-path recipe.json
 
+# ─────────────────────────── 2c. Cacher: build deps only (stable layer) ───────────────────────────
+FROM chef AS cacher
+COPY --from=planner /w/recipe.json recipe.json
+RUN --mount=type=cache,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/w/target \
+    cargo chef cook --release --recipe-path recipe.json
+
+# ─────────────────────────── 2d. Builder: compile the workspace binary ───────────────────────────
+FROM chef AS rs-builder
+COPY --from=cacher /w/target /w/target
+COPY --from=cacher /usr/local/cargo /usr/local/cargo
+COPY Cargo.toml Cargo.lock* ./
+COPY crates/ ./crates/
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/w/target \
     cargo build --release --bin mailify && \
