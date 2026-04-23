@@ -97,16 +97,14 @@ async fn sends_email_through_mailpit_end_to_end() {
             .json()
             .await
             .expect("parse json");
-        if resp
-            .get("total")
-            .and_then(|v| v.as_u64())
-            .unwrap_or(0)
-            > 0
-        {
+        if resp.get("total").and_then(|v| v.as_u64()).unwrap_or(0) > 0 {
             found = true;
             break;
         }
         tokio::time::sleep(std::time::Duration::from_millis(200)).await;
     }
-    assert!(found, "email with subject {marker} not delivered to mailpit");
+    assert!(
+        found,
+        "email with subject {marker} not delivered to mailpit"
+    );
 }

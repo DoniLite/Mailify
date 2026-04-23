@@ -9,7 +9,10 @@ fn tls_mode_display() {
 
 #[test]
 fn tls_mode_serialization_lowercase() {
-    assert_eq!(serde_json::to_string(&TlsMode::StartTls).unwrap(), "\"starttls\"");
+    assert_eq!(
+        serde_json::to_string(&TlsMode::StartTls).unwrap(),
+        "\"starttls\""
+    );
     let back: TlsMode = serde_json::from_str("\"tls\"").unwrap();
     assert_eq!(back, TlsMode::Tls);
 }

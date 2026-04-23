@@ -74,12 +74,7 @@ fn custom_job_serialization_preserves_kind() {
 
 #[test]
 fn smtp_override_omitted_from_json_when_none() {
-    let job = MailJob::new_registered(
-        "welcome",
-        addr("f@f"),
-        vec![addr("t@t")],
-        "en",
-    );
+    let job = MailJob::new_registered("welcome", addr("f@f"), vec![addr("t@t")], "en");
     let s = serde_json::to_string(&job).unwrap();
     assert!(!s.contains("smtp_override"));
 }

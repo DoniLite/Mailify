@@ -87,12 +87,7 @@ fn render_invalid_syntax_returns_error() {
     let reg = empty_registry();
     let renderer = TemplateRenderer::new(&reg);
     // Unterminated {% %} block.
-    let res = renderer.render_raw(
-        "{% if vars.x %}oops",
-        "s",
-        None,
-        &ctx(json!({ "x": true })),
-    );
+    let res = renderer.render_raw("{% if vars.x %}oops", "s", None, &ctx(json!({ "x": true })));
     assert!(res.is_err());
 }
 
