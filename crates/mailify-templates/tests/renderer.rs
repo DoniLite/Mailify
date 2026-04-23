@@ -49,3 +49,59 @@ fn renders_theme_tokens() {
         .unwrap();
     assert!(out.html.contains("color: #0f172a"));
 }
+
+#[test]
+fn renders_minijinja_control_flow() {
+    let reg = empty_registry();
+    let renderer = TemplateRenderer::new(&reg);
+
+    let html = "{% if vars.name %}Hi {{ vars.name }}{% else %}Hi there{% endif %}";
+    let with = renderer
+        .render_raw(html, "s", None, &ctx(json!({ "name": "Ada" })))
+        .unwrap();
+    assert!(with.html.contains("Hi Ada"));
+
+    let without = renderer
+        .render_raw(html, "s", None, &ctx(json!({})))
+        .unwrap();
+    assert!(without.html.contains("Hi there"));
+}
+
+#[test]
+fn render_accepts_missing_vars_gracefully_with_default() {
+    let reg = empty_registry();
+    let renderer = TemplateRenderer::new(&reg);
+    let out = renderer
+        .render_raw(
+            "Hello {{ vars.name or 'stranger' }}",
+            "s",
+            None,
+            &ctx(json!({})),
+        )
+        .unwrap();
+    assert!(out.html.contains("Hello stranger"));
+}
+
+#[test]
+fn render_invalid_syntax_returns_error() {
+    let reg = empty_registry();
+    let renderer = TemplateRenderer::new(&reg);
+    // Unterminated {% %} block.
+    let res = renderer.render_raw(
+        "{% if vars.x %}oops",
+        "s",
+        None,
+        &ctx(json!({ "x": true })),
+    );
+    assert!(res.is_err());
+}
+
+#[test]
+fn locale_is_exposed_to_templates() {
+    let reg = empty_registry();
+    let renderer = TemplateRenderer::new(&reg);
+    let out = renderer
+        .render_raw("lang={{ locale }}", "s", None, &ctx(json!({})))
+        .unwrap();
+    assert_eq!(out.html, "lang=en");
+}

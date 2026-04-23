@@ -40,3 +40,11 @@ utoipa-swagger-ui = { workspace = true }
 [dev-dependencies]
 tokio = { workspace = true }
 tower = { workspace = true }
+tokio-util = { workspace = true }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+urlencoding = "2"
+mailify-auth = { path = "../mailify-auth" }
+mailify-queue = { path = "../mailify-queue" }
+mailify-smtp = { path = "../mailify-smtp" }
+mailify-templates = { path = "../mailify-templates" }
+mailify-core = { path = "../mailify-core" }

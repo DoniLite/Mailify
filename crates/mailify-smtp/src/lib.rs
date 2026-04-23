@@ -184,3 +184,115 @@ fn fallback_text(html: &str) -> String {
     }
     out.split_whitespace().collect::<Vec<_>>().join(" ")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use mailify_core::email::EmailAddress;
+
+    #[test]
+    fn fallback_text_strips_tags_and_collapses_whitespace() {
+        let html = "<p>Hello <b>world</b></p>\n<p>   Second </p>";
+        assert_eq!(fallback_text(html), "Hello world Second");
+    }
+
+    #[test]
+    fn fallback_text_handles_empty_input() {
+        assert_eq!(fallback_text(""), "");
+        assert_eq!(fallback_text("<p></p>"), "");
+    }
+
+    #[test]
+    fn parse_mailbox_plain_address() {
+        let a = EmailAddress {
+            email: "alice@example.com".into(),
+            name: None,
+        };
+        let mb = parse_mailbox(&a).expect("parse");
+        assert_eq!(mb.email.to_string(), "alice@example.com");
+    }
+
+    #[test]
+    fn parse_mailbox_with_display_name() {
+        let a = EmailAddress {
+            email: "bob@example.com".into(),
+            name: Some("Bob Smith".into()),
+        };
+        let mb = parse_mailbox(&a).expect("parse");
+        let formatted = mb.to_string();
+        assert!(formatted.contains("Bob Smith"));
+        assert!(formatted.contains("bob@example.com"));
+    }
+
+    #[test]
+    fn parse_mailbox_rejects_invalid() {
+        let a = EmailAddress {
+            email: "not-an-email".into(),
+            name: None,
+        };
+        assert!(parse_mailbox(&a).is_err());
+    }
+
+    #[test]
+    fn build_message_sets_subject_and_recipients() {
+        use mailify_core::email::RenderedEmail;
+
+        let envelope = Envelope {
+            from: EmailAddress {
+                email: "from@example.com".into(),
+                name: None,
+            },
+            to: vec![EmailAddress {
+                email: "to@example.com".into(),
+                name: None,
+            }],
+            cc: vec![],
+            bcc: vec![],
+            reply_to: None,
+            headers: Default::default(),
+            attachments: vec![],
+        };
+        let rendered = RenderedEmail {
+            subject: "Test Subject".into(),
+            html: "<p>hi</p>".into(),
+            text: Some("hi".into()),
+        };
+        let msg = build_message(&envelope, &rendered).expect("build");
+        let raw = String::from_utf8_lossy(&msg.formatted()).to_string();
+        assert!(raw.contains("Subject: Test Subject"));
+        assert!(raw.contains("to@example.com"));
+        assert!(raw.contains("from@example.com"));
+    }
+
+    #[test]
+    fn build_message_includes_custom_headers() {
+        use mailify_core::email::RenderedEmail;
+
+        let mut headers = std::collections::HashMap::new();
+        headers.insert("X-Mailify-Tag".to_string(), "welcome".to_string());
+
+        let envelope = Envelope {
+            from: EmailAddress {
+                email: "from@example.com".into(),
+                name: None,
+            },
+            to: vec![EmailAddress {
+                email: "to@example.com".into(),
+                name: None,
+            }],
+            cc: vec![],
+            bcc: vec![],
+            reply_to: None,
+            headers,
+            attachments: vec![],
+        };
+        let rendered = RenderedEmail {
+            subject: "s".into(),
+            html: "<p>x</p>".into(),
+            text: None,
+        };
+        let msg = build_message(&envelope, &rendered).expect("build");
+        let raw = String::from_utf8_lossy(&msg.formatted()).to_string();
+        assert!(raw.contains("X-Mailify-Tag: welcome"));
+    }
+}
