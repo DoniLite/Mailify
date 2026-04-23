@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::time::Duration;
 
 use apalis::layers::retry::RetryPolicy;
 use apalis::prelude::*;
@@ -130,15 +131,36 @@ impl QueueRuntime {
         app_cfg: &AppConfig,
         deps: WorkerDeps,
     ) -> Result<(Self, QueueHandle), QueueError> {
+        let sanitized = redact_db_url(&app_cfg.database.url);
+        info!(
+            database.url = %sanitized,
+            database.max_connections = app_cfg.database.max_connections,
+            database.min_connections = app_cfg.database.min_connections,
+            "connecting to postgres",
+        );
+
         let pool = PgPoolOptions::new()
             .max_connections(app_cfg.database.max_connections)
             .min_connections(app_cfg.database.min_connections)
+            .acquire_timeout(Duration::from_secs(10))
             .connect(&app_cfg.database.url)
-            .await?;
-
-        PostgresStorage::setup(&pool)
             .await
-            .map_err(|e| QueueError::Migrate(e.to_string()))?;
+            .map_err(|e| {
+                error!(error = %e, database.url = %sanitized, "postgres connection failed");
+                QueueError::Sqlx(e)
+            })?;
+
+        sqlx::query("SELECT 1").execute(&pool).await.map_err(|e| {
+            error!(error = %e, "postgres ping (SELECT 1) failed");
+            QueueError::Sqlx(e)
+        })?;
+        info!("postgres reachable");
+
+        PostgresStorage::setup(&pool).await.map_err(|e| {
+            error!(error = %e, "apalis migrations failed");
+            QueueError::Migrate(e.to_string())
+        })?;
+        info!("apalis migrations applied");
 
         let storage = PostgresStorage::new(pool.clone());
         let handle = QueueHandle {
@@ -258,4 +280,42 @@ async fn process(job: MailJob, deps: Arc<WorkerDeps>) -> Result<(), String> {
 
 fn sender_from_override(ov: &SmtpOverride) -> Result<SmtpSender, mailify_smtp::SmtpError> {
     SmtpSender::from_override(ov)
+}
+
+/// Strip password from a `postgres://user:pass@host/db` URL so it is safe to log.
+fn redact_db_url(url: &str) -> String {
+    match (url.find("://"), url.find('@')) {
+        (Some(scheme_end), Some(at)) if scheme_end + 3 < at => {
+            let (prefix, rest) = url.split_at(scheme_end + 3);
+            let (creds, host) = rest.split_at(at - (scheme_end + 3));
+            let user = creds.split(':').next().unwrap_or("");
+            if user.is_empty() {
+                format!("{prefix}***{host}")
+            } else {
+                format!("{prefix}{user}:***{host}")
+            }
+        }
+        _ => url.to_string(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn redact_db_url_masks_password() {
+        assert_eq!(
+            redact_db_url("postgres://mailify:secret@localhost:5432/mailify"),
+            "postgres://mailify:***@localhost:5432/mailify"
+        );
+    }
+
+    #[test]
+    fn redact_db_url_without_creds_is_unchanged() {
+        assert_eq!(
+            redact_db_url("postgres://localhost/mailify"),
+            "postgres://localhost/mailify"
+        );
+    }
 }

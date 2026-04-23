@@ -114,14 +114,28 @@ fn maybe_bootstrap_auth(cfg: &mut AppConfig) {
 }
 
 fn init_tracing(cfg: &AppConfig) {
-    let filter =
-        EnvFilter::try_new(&cfg.observability.log_level).unwrap_or_else(|_| EnvFilter::new("info"));
+    // Precedence: RUST_LOG (standard) > cfg.observability.log_level > built-in fallback.
+    let filter = EnvFilter::try_from_default_env()
+        .or_else(|_| EnvFilter::try_new(&cfg.observability.log_level))
+        .unwrap_or_else(|_| {
+            EnvFilter::new(
+                "info,mailify=debug,mailify_api=debug,mailify_queue=debug,tower_http=info",
+            )
+        });
     let registry = tracing_subscriber::registry().with(filter);
     match cfg.observability.log_format {
         LogFormat::Json => registry
             .with(tracing_subscriber::fmt::layer().json())
             .init(),
-        LogFormat::Pretty => registry.with(tracing_subscriber::fmt::layer()).init(),
+        LogFormat::Pretty => registry
+            .with(
+                tracing_subscriber::fmt::layer()
+                    .with_target(true)
+                    .with_thread_ids(false)
+                    .with_level(true)
+                    .compact(),
+            )
+            .init(),
     }
 }
 
