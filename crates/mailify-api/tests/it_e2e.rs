@@ -66,6 +66,7 @@ fn build_test_cfg(url: String) -> AppConfig {
             jwt_issuer: "mailify-e2e".into(),
             jwt_ttl_secs: 300,
             api_keys: Default::default(),
+            bootstrap: false,
         },
         queue: QueueConfig {
             worker_concurrency: 2,

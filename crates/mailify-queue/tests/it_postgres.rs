@@ -69,6 +69,7 @@ fn test_cfg(url: String) -> AppConfig {
             jwt_issuer: "mailify".into(),
             jwt_ttl_secs: 60,
             api_keys: Default::default(),
+            bootstrap: false,
         },
         queue: QueueConfig {
             worker_concurrency: 2,

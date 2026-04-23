@@ -8,4 +8,4 @@ pub mod job;
 pub mod worker;
 
 pub use job::{MailJob, MailJobKind};
-pub use worker::{QueueHandle, QueueRuntime};
+pub use worker::{JobSnapshot, QueueHandle, QueueRuntime};

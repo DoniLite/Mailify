@@ -42,6 +42,7 @@ impl Modify for SecurityAddon {
         routes::config::get_config,
         routes::mail::send_registered,
         routes::mail::send_custom,
+        routes::mail::get_job_state,
     ),
     components(schemas(
         // Domain types
@@ -69,6 +70,7 @@ impl Modify for SecurityAddon {
         routes::mail::SendRegisteredRequest,
         routes::mail::SendCustomRequest,
         routes::mail::EnqueuedResponse,
+        routes::mail::JobStateResponse,
     )),
     tags(
         (name = "auth", description = "JWT issuance"),

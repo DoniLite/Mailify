@@ -29,6 +29,7 @@ pub fn build_router(state: AppState) -> Router {
             "/mail/send-custom",
             axum::routing::post(routes::mail::send_custom),
         )
+        .route("/mail/jobs/:id", get(routes::mail::get_job_state))
         .route("/templates", get(routes::templates::list))
         .route(
             "/templates/:id/preview",

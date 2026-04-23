@@ -2,7 +2,9 @@ use std::sync::Arc;
 
 use apalis::layers::retry::RetryPolicy;
 use apalis::prelude::*;
+use apalis_sql::context::SqlContext;
 use apalis_sql::postgres::{PgListen, PostgresStorage};
+use chrono::{DateTime, Utc};
 use mailify_config::{AppConfig, QueueConfig};
 use mailify_core::smtp_override::SmtpOverride;
 use mailify_smtp::{Envelope, SmtpSender};
@@ -20,24 +22,92 @@ pub enum QueueError {
     Migrate(String),
     #[error("apalis push error: {0}")]
     Push(String),
+    #[error("invalid task id: {0}")]
+    InvalidId(String),
+    #[error("apalis fetch error: {0}")]
+    Fetch(String),
     #[error("worker error: {0}")]
     Worker(String),
 }
 
-/// Handle used by HTTP routes to enqueue jobs.
+/// Point-in-time view of a queued job's state, as exposed to HTTP clients.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct JobSnapshot {
+    /// apalis task id (ULID) — the externally-visible job identifier.
+    pub task_id: String,
+    /// Our domain-level MailJob id (useful to correlate logs).
+    pub mail_id: uuid::Uuid,
+    /// One of: pending, scheduled, running, done, failed, killed.
+    pub status: String,
+    pub attempts: usize,
+    pub max_attempts: i32,
+    pub last_error: Option<String>,
+    pub run_at: DateTime<Utc>,
+    /// Unix seconds when the job was locked by a worker.
+    pub lock_at: Option<i64>,
+    /// Unix seconds when the job finished (either Done or Failed).
+    pub done_at: Option<i64>,
+}
+
+/// Handle used by HTTP routes to enqueue and inspect jobs.
 #[derive(Clone)]
 pub struct QueueHandle {
     storage: PostgresStorage<MailJob>,
 }
 
 impl QueueHandle {
-    pub async fn push(&mut self, job: MailJob) -> Result<uuid::Uuid, QueueError> {
-        let id = job.id;
-        self.storage
+    /// Enqueue a job and return its apalis task id (ULID string).
+    pub async fn push(&mut self, job: MailJob) -> Result<String, QueueError> {
+        let parts = self
+            .storage
             .push(job)
             .await
             .map_err(|e| QueueError::Push(e.to_string()))?;
-        Ok(id)
+        Ok(parts.task_id.to_string())
+    }
+
+    /// Fetch a snapshot of a job's current state. Returns `None` if the id is unknown
+    /// or the job has been vacuumed out of storage.
+    pub async fn fetch(&mut self, task_id: &str) -> Result<Option<JobSnapshot>, QueueError> {
+        let parsed: TaskId = task_id
+            .parse()
+            .map_err(|e| QueueError::InvalidId(format!("{e}")))?;
+        let res = self
+            .storage
+            .fetch_by_id(&parsed)
+            .await
+            .map_err(|e| QueueError::Fetch(e.to_string()))?;
+        Ok(res.map(|req| snapshot_from_request(task_id, &req)))
+    }
+}
+
+fn snapshot_from_request(
+    task_id: &str,
+    req: &apalis::prelude::Request<MailJob, SqlContext>,
+) -> JobSnapshot {
+    let ctx = &req.parts.context;
+    JobSnapshot {
+        task_id: task_id.to_string(),
+        mail_id: req.args.id,
+        status: state_label(ctx.status()).to_string(),
+        attempts: req.parts.attempt.current(),
+        max_attempts: ctx.max_attempts(),
+        last_error: ctx.last_error().clone(),
+        run_at: *ctx.run_at(),
+        lock_at: *ctx.lock_at(),
+        done_at: *ctx.done_at(),
+    }
+}
+
+fn state_label(s: &apalis::prelude::State) -> &'static str {
+    use apalis::prelude::State;
+    match s {
+        State::Pending => "pending",
+        State::Scheduled => "scheduled",
+        State::Running => "running",
+        State::Done => "done",
+        State::Failed => "failed",
+        State::Killed => "killed",
     }
 }
 

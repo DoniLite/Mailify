@@ -1,12 +1,18 @@
 use std::sync::Arc;
 
-use axum::{extract::State, Json};
+use axum::{
+    extract::{Path, State},
+    Json,
+};
 use mailify_core::{
     email::{Attachment, EmailAddress},
     priority::Priority,
     smtp_override::SmtpOverride,
 };
-use mailify_queue::job::{MailJob, MailJobKind};
+use mailify_queue::{
+    job::{MailJob, MailJobKind},
+    JobSnapshot,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use utoipa::ToSchema;
@@ -66,8 +72,39 @@ pub struct SendCustomRequest {
 
 #[derive(Debug, Serialize, ToSchema)]
 pub struct EnqueuedResponse {
-    pub job_id: Uuid,
+    /// Queue task id (ULID). Use it with `GET /mail/jobs/{id}` to poll state.
+    pub job_id: String,
     pub status: String,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct JobStateResponse {
+    pub task_id: String,
+    pub mail_id: Uuid,
+    /// One of: `pending`, `scheduled`, `running`, `done`, `failed`, `killed`.
+    pub status: String,
+    pub attempts: usize,
+    pub max_attempts: i32,
+    pub last_error: Option<String>,
+    pub run_at: chrono::DateTime<chrono::Utc>,
+    pub lock_at: Option<i64>,
+    pub done_at: Option<i64>,
+}
+
+impl From<JobSnapshot> for JobStateResponse {
+    fn from(s: JobSnapshot) -> Self {
+        Self {
+            task_id: s.task_id,
+            mail_id: s.mail_id,
+            status: s.status,
+            attempts: s.attempts,
+            max_attempts: s.max_attempts,
+            last_error: s.last_error,
+            run_at: s.run_at,
+            lock_at: s.lock_at,
+            done_at: s.done_at,
+        }
+    }
 }
 
 /// Queue an email using a built-in template (see `GET /templates` for available ids).
@@ -121,7 +158,7 @@ pub async fn send_registered(
         .map_err(|e| ApiError::Internal(e.to_string()))?;
     Ok(Json(EnqueuedResponse {
         job_id: id,
-        status: "queued".into(),
+        status: "pending".into(),
     }))
 }
 
@@ -179,8 +216,35 @@ pub async fn send_custom(
         .map_err(|e| ApiError::Internal(e.to_string()))?;
     Ok(Json(EnqueuedResponse {
         job_id: id,
-        status: "queued".into(),
+        status: "pending".into(),
     }))
+}
+
+/// Fetch the current state of a previously-enqueued job.
+#[utoipa::path(
+    get,
+    path = "/mail/jobs/{id}",
+    tag = "mail",
+    params(("id" = String, Path, description = "Task id returned by /mail/send or /mail/send-custom")),
+    security(("bearer_jwt" = [])),
+    responses(
+        (status = 200, description = "Job state", body = JobStateResponse),
+        (status = 400, description = "Malformed id"),
+        (status = 401, description = "Missing or invalid JWT"),
+        (status = 404, description = "Unknown job id (or vacuumed)"),
+    )
+)]
+pub async fn get_job_state(
+    State(state): State<Arc<AppState>>,
+    Path(id): Path<String>,
+) -> Result<Json<JobStateResponse>, ApiError> {
+    let mut queue = state.queue.clone();
+    match queue.fetch(&id).await {
+        Ok(Some(snap)) => Ok(Json(snap.into())),
+        Ok(None) => Err(ApiError::NotFound),
+        Err(mailify_queue::worker::QueueError::InvalidId(m)) => Err(ApiError::BadRequest(m)),
+        Err(e) => Err(ApiError::Internal(e.to_string())),
+    }
 }
 
 fn default_from(

@@ -1,7 +1,9 @@
 use std::sync::Arc;
 
 use mailify_api::{build_router, AppState};
-use mailify_auth::JwtIssuer;
+use mailify_auth::{
+    generate_bootstrap_key, generate_jwt_secret, print_bootstrap_banner, JwtIssuer,
+};
 use mailify_config::{AppConfig, LogFormat};
 use mailify_queue::{worker::WorkerDeps, QueueRuntime};
 use mailify_smtp::SmtpSender;
@@ -12,10 +14,12 @@ use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let cfg = AppConfig::load()?;
+    let mut cfg = AppConfig::load()?;
     init_tracing(&cfg);
 
     info!(version = env!("CARGO_PKG_VERSION"), "starting mailify");
+
+    maybe_bootstrap_auth(&mut cfg);
 
     info!(api_key_ids = ?cfg.auth.api_keys.keys().cloned().collect::<Vec<_>>(), "loaded auth api_key ids");
 
@@ -78,6 +82,35 @@ async fn main() -> anyhow::Result<()> {
     let _ = worker_task.await;
     info!("mailify stopped");
     Ok(())
+}
+
+const DEFAULT_JWT_SECRET: &str = "CHANGE_ME_IN_PRODUCTION";
+const BOOTSTRAP_KEY_ID: &str = "DEFAULT";
+
+fn maybe_bootstrap_auth(cfg: &mut AppConfig) {
+    if !cfg.auth.bootstrap || !cfg.auth.api_keys.is_empty() {
+        return;
+    }
+
+    let key = match generate_bootstrap_key(BOOTSTRAP_KEY_ID) {
+        Ok(k) => k,
+        Err(e) => {
+            error!(error = %e, "failed to generate bootstrap api key");
+            return;
+        }
+    };
+
+    let jwt_override = if cfg.auth.jwt_secret == DEFAULT_JWT_SECRET {
+        let secret = generate_jwt_secret();
+        cfg.auth.jwt_secret = secret.clone();
+        Some(secret)
+    } else {
+        None
+    };
+
+    cfg.auth.api_keys.insert(key.id.clone(), key.hash.clone());
+
+    print_bootstrap_banner(&key, jwt_override.as_deref());
 }
 
 fn init_tracing(cfg: &AppConfig) {
