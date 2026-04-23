@@ -62,9 +62,10 @@ fn api_keys_map_loaded_from_env() {
     }
 
     let cfg = AppConfig::load().expect("load");
-    let keys: std::collections::HashSet<_> = cfg.auth.api_keys.keys().collect();
-    assert!(keys.contains(&"web".to_string()));
-    assert!(keys.contains(&"cli".to_string()));
+    let keys: std::collections::HashSet<&str> =
+        cfg.auth.api_keys.keys().map(String::as_str).collect();
+    assert!(keys.contains("web"));
+    assert!(keys.contains("cli"));
     assert_eq!(cfg.auth.api_keys["web"], "$argon2id$fakehash1");
 }
 
