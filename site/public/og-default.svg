@@ -1,0 +1,14 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#0B1020"/>
+  <rect x="72" y="72" width="1056" height="486" rx="28" fill="#111832" stroke="#1F2937" stroke-width="2"/>
+  <path d="M931 441L1097 275" stroke="#2D5BFF" stroke-width="28" stroke-linecap="round"/>
+  <path d="M988 498L1128 358" stroke="#FF8A3D" stroke-width="18" stroke-linecap="round"/>
+  <rect x="100" y="108" width="84" height="62" rx="16" fill="#F8FAFC"/>
+  <path d="M112 122L138.244 141.207C139.277 141.964 140.723 141.964 141.756 141.207L168 122" stroke="#2D5BFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M154 108H172C178.627 108 184 113.373 184 120V140" stroke="#FF8A3D" stroke-width="6" stroke-linecap="round"/>
+  <path d="M152 121L160 113" stroke="#FF8A3D" stroke-width="6" stroke-linecap="round"/>
+  <text x="224" y="154" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="54" font-weight="600">Mailify</text>
+  <text x="100" y="286" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="80" font-weight="600">The mail server that</text>
+  <text x="100" y="370" fill="#F8FAFC" font-family="Inter, Arial, sans-serif" font-size="80" font-weight="600">wears your brand.</text>
+  <text x="100" y="444" fill="#94A3B8" font-family="Inter, Arial, sans-serif" font-size="34">Self-hosted, theme-aware transactional mail server in Rust.</text>
+</svg>

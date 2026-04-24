@@ -12,6 +12,7 @@ Cargo.lock.old
 .vscode/
 *.swp
 *.swo
+.codex
 
 # OS
 .DS_Store

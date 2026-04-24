@@ -1,0 +1,24 @@
+{
+  "name": "mailify-site",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^6.1.9",
+    "@astrojs/starlight": "^0.38.4",
+    "@astrojs/sitemap": "^3.2.0",
+    "@astrojs/check": "^0.9.0",
+    "@fontsource/inter": "^5.1.0",
+    "@fontsource/geist-sans": "^5.1.0",
+    "@fontsource/geist-mono": "^5.1.0",
+    "typescript": "^6.0.3",
+    "sharp": "^0.34.5"
+  }
+}

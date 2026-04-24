@@ -1,0 +1,69 @@
+<button class="theme-toggle" type="button" aria-label="Toggle color theme" data-theme-toggle>
+  <span class="theme-toggle__icon theme-toggle__icon--sun" aria-hidden="true">Light</span>
+  <span class="theme-toggle__icon theme-toggle__icon--moon" aria-hidden="true">Dark</span>
+</button>
+
+<script is:inline>
+  const storageKey = 'starlight-theme';
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
+
+  const getTheme = () => {
+    const stored = localStorage.getItem(storageKey);
+    return stored === 'light' || stored === 'dark' ? stored : 'auto';
+  };
+
+  const resolveTheme = (theme) => theme === 'auto' ? (mediaQuery.matches ? 'light' : 'dark') : theme;
+
+  const applyTheme = (theme) => {
+    document.documentElement.dataset.theme = resolveTheme(theme);
+    if (theme === 'auto') localStorage.removeItem(storageKey);
+    else localStorage.setItem(storageKey, theme);
+  };
+
+  applyTheme(getTheme());
+
+  document.querySelector('[data-theme-toggle]')?.addEventListener('click', () => {
+    const nextTheme = resolveTheme(getTheme()) === 'dark' ? 'light' : 'dark';
+    applyTheme(nextTheme);
+  });
+
+  mediaQuery.addEventListener('change', () => {
+    if (getTheme() === 'auto') applyTheme('auto');
+  });
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--bg-raised) 82%, transparent);
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .theme-toggle__icon {
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  
+  .theme-toggle__icon--moon {
+    color: var(--text-muted);
+  }
+
+  :root[data-theme='dark'] .theme-toggle__icon--sun {
+    color: var(--text-muted);
+  }
+
+  :root[data-theme='dark'] .theme-toggle__icon--moon {
+    color: var(--text);
+  }
+</style>

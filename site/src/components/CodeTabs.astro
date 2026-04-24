@@ -1,0 +1,124 @@
+---
+const snippet = `# 1. Exchange API key for a short-lived JWT
+curl -X POST https://mailify.example.com/auth/token \\
+  -H 'content-type: application/json' \\
+  -d '{"api_key":"dev-secret"}'
+
+# 2. Queue a themed email
+curl -X POST https://mailify.example.com/mail/send \\
+  -H "authorization: Bearer <jwt>" \\
+  -H 'content-type: application/json' \\
+  -d '{
+    "template_id": "welcome",
+    "locale": "en",
+    "to": [{"email": "alice@example.com"}],
+    "vars": {"product_name": "Mailify"}
+  }'`;
+---
+
+<section class="section">
+  <div class="shell panel">
+    <div class="copy">
+      <p class="kicker">Workflow</p>
+      <h2>Token, send, deliver.</h2>
+      <p>
+        Mailify keeps the request path boring: exchange an API key for a JWT, send a template id,
+        let the queue handle the actual SMTP work.
+      </p>
+    </div>
+
+    <div class="code">
+      <div class="window-bar">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <pre><code>{snippet}</code></pre>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section {
+    padding: var(--space-16) 0;
+  }
+
+  .shell {
+    width: min(100% - 2rem, var(--container-main));
+    margin: 0 auto;
+  }
+
+  .panel {
+    display: grid;
+    gap: var(--space-8);
+    padding: var(--space-8);
+    border: 1px solid var(--border);
+    border-radius: 1.5rem;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--bg-raised) 94%, transparent), color-mix(in srgb, var(--brand-primary-muted) 45%, transparent));
+  }
+
+  .kicker {
+    margin: 0;
+    color: var(--brand-primary);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+
+  .copy h2 {
+    margin: var(--space-3) 0;
+    font-size: clamp(var(--fs-xl), 4vw, var(--fs-2xl));
+  }
+
+  .copy p {
+    max-width: 34rem;
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .code {
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--ink-300) 22%, transparent);
+    border-radius: 1rem;
+    background: #0f172a;
+    color: #dbe5ff;
+  }
+
+  .window-bar {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  }
+
+  .window-bar span {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 999px;
+    background: rgba(248, 250, 252, 0.32);
+  }
+
+  .window-bar span:first-child {
+    background: #ff8a3d;
+  }
+
+  .window-bar span:nth-child(2) {
+    background: #2d5bff;
+  }
+
+  pre {
+    margin: 0;
+    padding: 1.25rem;
+    overflow-x: auto;
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+
+  @media (min-width: 1024px) {
+    .panel {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      align-items: center;
+    }
+  }
+</style>

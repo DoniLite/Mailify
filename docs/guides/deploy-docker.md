@@ -116,7 +116,7 @@ Don't expose `8080` directly. Put Caddy / nginx / Traefik in front for TLS + rat
 
 ### Caddy example
 
-```caddy
+```txt
 mailify.yourdomain.com {
     reverse_proxy localhost:8080
     encode zstd gzip

@@ -1,0 +1,19 @@
+---
+import ArchitectureDiagram from '../components/ArchitectureDiagram.astro';
+import CodeTabs from '../components/CodeTabs.astro';
+import FeatureGrid from '../components/FeatureGrid.astro';
+import Hero from '../components/Hero.astro';
+import MarketingLayout from '../components/MarketingLayout.astro';
+import ThemeShowcase from '../components/ThemeShowcase.astro';
+---
+
+<MarketingLayout
+  title="Mailify — The mail server that wears your brand"
+  description="Self-hosted, theme-aware transactional mail server in Rust. One Docker image, your brand, zero vendor lock-in."
+>
+  <Hero />
+  <FeatureGrid />
+  <CodeTabs />
+  <ThemeShowcase />
+  <ArchitectureDiagram />
+</MarketingLayout>
