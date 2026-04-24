@@ -1,0 +1,63 @@
+---
+import MarketingLayout from '../components/MarketingLayout.astro';
+---
+
+<MarketingLayout
+  title="Page not found — Mailify"
+  description="The page you're looking for has been moved, removed, or never existed."
+>
+  <section class="notfound">
+    <div class="shell">
+      <p class="eyebrow">404</p>
+      <h1>Wrong envelope.</h1>
+      <p class="lede">
+        This URL didn't match any page on mailify.donilite.me. Maybe it's been renamed,
+        maybe it never existed.
+      </p>
+      <div class="actions">
+        <a class="btn btn-primary" href="/">Back to home</a>
+        <a class="btn btn-secondary" href="/docs/getting-started/installation">Read the docs</a>
+        <a class="btn btn-ghost" href="https://github.com/donilite/mailify/issues" rel="noopener">
+          Report a broken link
+        </a>
+      </div>
+    </div>
+  </section>
+</MarketingLayout>
+
+<style>
+  .notfound {
+    padding: var(--space-24) 0;
+    text-align: center;
+  }
+  .shell {
+    width: min(100% - 2rem, 44rem);
+    margin: 0 auto;
+  }
+  .eyebrow {
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--fs-md);
+    color: var(--brand-primary);
+    letter-spacing: 0.12em;
+  }
+  h1 {
+    margin: 0;
+    font-size: clamp(var(--fs-2xl), 6vw, var(--fs-3xl));
+    letter-spacing: -0.03em;
+  }
+  .lede {
+    margin: var(--space-4) auto 0;
+    max-width: 32rem;
+    color: var(--text-muted);
+    font-size: var(--fs-md);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    justify-content: center;
+    margin-top: var(--space-8);
+  }
+</style>

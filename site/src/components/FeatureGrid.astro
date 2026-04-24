@@ -1,0 +1,125 @@
+---
+const features = [
+  {
+    title: 'Branded from config',
+    body: 'Theme tokens flow into every render so your mail looks like your product, not like a provider default.',
+  },
+  {
+    title: 'Self-hosted by design',
+    body: 'Bring your own SMTP provider, run one Docker image, keep your templates and delivery path under your control.',
+  },
+  {
+    title: 'Templates as code',
+    body: 'React Email compiles to HTML ahead of time while minijinja placeholders stay live for runtime variables.',
+  },
+  {
+    title: 'Durable delivery queue',
+    body: 'Jobs persist in Postgres through apalis, so a worker restart does not eat your outbound mail.',
+  },
+  {
+    title: 'Multi-tenant friendly',
+    body: 'Per-job SMTP override lets one Mailify instance fan out across tenants without leaking shared credentials.',
+  },
+  {
+    title: 'Docs-first ergonomics',
+    body: 'Clear config, predictable routes, and CLI helpers keep setup close to a boring infrastructure service.',
+  },
+];
+---
+
+<section class="section">
+  <div class="shell">
+    <div class="intro">
+      <p class="kicker">Why Mailify</p>
+      <h2>Built for developers who want ownership without redoing email infra from scratch.</h2>
+    </div>
+
+    <div class="grid">
+      {features.map((feature) => (
+        <article class="card">
+          <div class="icon" aria-hidden="true"></div>
+          <h3>{feature.title}</h3>
+          <p>{feature.body}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .section {
+    padding: var(--space-16) 0;
+  }
+
+  .shell {
+    width: min(100% - 2rem, var(--container-main));
+    margin: 0 auto;
+  }
+
+  .kicker {
+    margin: 0;
+    color: var(--brand-primary);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+
+  .intro h2 {
+    max-width: 18ch;
+    margin: var(--space-3) 0 0;
+    font-size: clamp(var(--fs-xl), 5vw, var(--fs-2xl));
+    line-height: 1.1;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+  }
+
+  .card {
+    padding: var(--space-6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-raised);
+    transition: transform 150ms ease-out, box-shadow 150ms ease-out, border-color 150ms ease-out;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: color-mix(in srgb, var(--brand-primary) 30%, var(--border));
+  }
+
+  .icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.7rem;
+    background:
+      linear-gradient(135deg, var(--brand-primary), color-mix(in srgb, var(--brand-primary) 42%, white));
+  }
+
+  .card h3 {
+    margin: var(--space-4) 0 var(--space-3);
+    font-size: var(--fs-md);
+  }
+
+  .card p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  @media (min-width: 640px) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

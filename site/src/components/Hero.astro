@@ -1,0 +1,176 @@
+<section class="hero">
+  <div class="shell">
+    <div class="copy">
+      <p class="eyebrow">Self-hosted. Theme-aware. Rust-fast.</p>
+      <h1>The mail server that wears your brand.</h1>
+      <p class="lede">
+        Self-hosted transactional mail with your colors, your templates, and your SMTP provider.
+        One Docker image. Zero vendor lock-in.
+      </p>
+
+      <div class="actions">
+        <a class="btn btn-primary" href="/docs/getting-started/installation">Get started</a>
+        <a class="docker-pill" href="/docs/getting-started/installation" aria-label="Read the install docs">
+          <span>docker pull donighost/mailify</span>
+        </a>
+      </div>
+
+      <ul class="proof">
+        <li>Branded emails from config-driven theme tokens</li>
+        <li>Per-job SMTP override for multi-tenant setups</li>
+        <li>Compiled React Email templates with a durable queue</li>
+      </ul>
+    </div>
+
+    <div class="visual" aria-hidden="true">
+      <div class="orb orb-primary"></div>
+      <div class="orb orb-accent"></div>
+      <svg viewBox="0 0 520 420" class="hero-svg">
+        <defs>
+          <linearGradient id="mailify-surface" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="var(--bg-raised)" />
+            <stop offset="100%" stop-color="color-mix(in srgb, var(--brand-primary-muted) 55%, var(--bg-raised))" />
+          </linearGradient>
+        </defs>
+        <rect x="78" y="76" width="272" height="210" rx="28" fill="url(#mailify-surface)" stroke="var(--border)" stroke-width="2" />
+        <path d="M108 114L207.758 189.773C210.704 192.012 214.766 192.012 217.712 189.773L318 114" stroke="var(--brand-primary)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M282 76H354C370.569 76 384 89.4315 384 106V181" stroke="var(--brand-accent)" stroke-width="12" stroke-linecap="round" />
+        <path d="M278 138L324 92" stroke="var(--brand-accent)" stroke-width="12" stroke-linecap="round" />
+        <rect x="198" y="220" width="190" height="114" rx="24" fill="var(--ink-900)" opacity="0.96" />
+        <rect x="222" y="246" width="110" height="16" rx="8" fill="var(--brand-primary)" />
+        <rect x="222" y="276" width="126" height="10" rx="5" fill="var(--ink-300)" />
+        <rect x="222" y="298" width="84" height="10" rx="5" fill="var(--ink-300)" />
+        <rect x="332" y="246" width="34" height="34" rx="10" fill="var(--brand-accent)" />
+      </svg>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding: var(--space-12) 0 var(--space-24);
+    background:
+      radial-gradient(circle at top left, color-mix(in srgb, var(--brand-primary-muted) 82%, transparent), transparent 34%),
+      radial-gradient(circle at 85% 20%, color-mix(in srgb, var(--brand-accent-muted) 65%, transparent), transparent 22%),
+      linear-gradient(180deg, color-mix(in srgb, var(--bg-raised) 55%, transparent), transparent 55%);
+  }
+
+  .shell {
+    width: min(100% - 2rem, var(--container-wide));
+    margin: 0 auto;
+    display: grid;
+    gap: var(--space-12);
+    align-items: center;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    margin: 0 0 var(--space-6);
+    padding: 0.4rem 0.7rem;
+    border-radius: var(--radius-full);
+    background: var(--brand-primary-muted);
+    color: var(--brand-primary);
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    max-width: 11ch;
+    font-size: clamp(var(--fs-2xl), 8vw, var(--fs-4xl));
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+  }
+
+  .lede {
+    max-width: 38rem;
+    margin: var(--space-6) 0 0;
+    font-size: var(--fs-md);
+    color: var(--text-muted);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+  }
+
+  .docker-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    background: color-mix(in srgb, var(--bg-raised) 82%, transparent);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+  }
+
+  .proof {
+    display: grid;
+    gap: var(--space-3);
+    margin: var(--space-8) 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--text-muted);
+  }
+
+  .proof li::before {
+    content: '';
+    display: inline-block;
+    width: 0.55rem;
+    height: 0.55rem;
+    margin-right: 0.75rem;
+    border-radius: 999px;
+    background: var(--brand-accent);
+  }
+
+  .visual {
+    position: relative;
+    min-height: 24rem;
+    display: grid;
+    place-items: center;
+  }
+
+  .hero-svg {
+    width: min(100%, 32rem);
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(var(--shadow-lg));
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(10px);
+    opacity: 0.8;
+  }
+
+  .orb-primary {
+    width: 12rem;
+    height: 12rem;
+    top: 0;
+    right: 2rem;
+    background: color-mix(in srgb, var(--brand-primary) 28%, transparent);
+  }
+
+  .orb-accent {
+    width: 9rem;
+    height: 9rem;
+    left: 2rem;
+    bottom: 1rem;
+    background: color-mix(in srgb, var(--brand-accent) 30%, transparent);
+  }
+
+  @media (min-width: 1024px) {
+    .shell {
+      grid-template-columns: minmax(0, 1.1fr) minmax(22rem, 30rem);
+    }
+  }
+</style>

@@ -1,0 +1,175 @@
+<section class="section">
+  <div class="shell split">
+    <div>
+      <p class="kicker">Theme system</p>
+      <h2>Brand once. Reuse everywhere.</h2>
+      <p class="body">
+        Mailify’s default templates read from a theme object at render time, so brand changes stay
+        in config instead of leaking into every mail template.
+      </p>
+
+      <div class="swatches" aria-label="Mailify brand tokens">
+        <div><span style="background: var(--brand-primary);"></span><code>primary</code></div>
+        <div><span style="background: var(--brand-accent);"></span><code>accent</code></div>
+        <div><span style="background: var(--success);"></span><code>success</code></div>
+      </div>
+    </div>
+
+    <div class="preview">
+      <div class="mail">
+        <div class="mail__top">
+          <div class="mail__logo">
+            <img src="/favicon.svg" alt="" width="22" height="22" />
+            <strong>Mailify</strong>
+          </div>
+          <span class="badge">welcome</span>
+        </div>
+        <h3>Your brand, not your provider.</h3>
+        <p>
+          Swap colors and logo once, then keep shipping the same templates across environments and
+          tenants.
+        </p>
+        <a href="/" class="mail__button">Open dashboard</a>
+        <div class="mail__footer">
+          <span>Primary</span>
+          <span>Accent</span>
+          <span>Radius</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section {
+    padding: var(--space-16) 0;
+  }
+
+  .shell {
+    width: min(100% - 2rem, var(--container-main));
+    margin: 0 auto;
+  }
+
+  .split {
+    display: grid;
+    gap: var(--space-8);
+    align-items: center;
+  }
+
+  .kicker {
+    margin: 0;
+    color: var(--brand-primary);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+
+  h2 {
+    margin: var(--space-3) 0;
+    font-size: clamp(var(--fs-xl), 4vw, var(--fs-2xl));
+  }
+
+  .body {
+    max-width: 36rem;
+    color: var(--text-muted);
+  }
+
+  .swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+  }
+
+  .swatches div {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 0.6rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    background: var(--bg-raised);
+  }
+
+  .swatches span {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 999px;
+  }
+
+  .preview {
+    display: grid;
+    place-items: center;
+  }
+
+  .mail {
+    width: min(100%, 28rem);
+    padding: var(--space-6);
+    border: 1px solid var(--border);
+    border-radius: 1.5rem;
+    background: var(--bg-raised);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .mail__top,
+  .mail__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .mail__logo {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-family: var(--font-display);
+  }
+
+  .badge {
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-full);
+    background: var(--brand-accent-muted);
+    color: var(--brand-accent);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .mail h3 {
+    margin: var(--space-8) 0 var(--space-3);
+    font-size: var(--fs-lg);
+  }
+
+  .mail p {
+    margin: 0;
+    color: var(--text-muted);
+  }
+
+  .mail__button {
+    display: inline-flex;
+    margin-top: var(--space-8);
+    padding: 0.8rem 1rem;
+    border-radius: var(--radius-md);
+    background: var(--brand-primary);
+    color: white;
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+
+  .mail__footer {
+    margin-top: var(--space-8);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  @media (min-width: 1024px) {
+    .split {
+      grid-template-columns: minmax(0, 1fr) minmax(18rem, 26rem);
+    }
+  }
+</style>

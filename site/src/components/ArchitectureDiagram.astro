@@ -1,0 +1,116 @@
+---
+const crates = [
+  'mailify-core',
+  'mailify-config',
+  'mailify-templates',
+  'mailify-smtp',
+  'mailify-queue',
+  'mailify-auth',
+  'mailify-api',
+];
+---
+
+<section class="section">
+  <div class="shell">
+    <div class="intro">
+      <p class="kicker">Architecture</p>
+      <h2>Seven crates. One delivery path.</h2>
+      <p>
+        The API layer receives mail requests, auth validates tokens, templates render branded HTML,
+        and the queue worker ships through SMTP.
+      </p>
+    </div>
+
+    <div class="diagram">
+      {crates.map((crateName, index) => (
+        <div class:list={['node', index === crates.length - 1 && 'node--primary']}>
+          {crateName}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .section {
+    padding: var(--space-16) 0 var(--space-24);
+  }
+
+  .shell {
+    width: min(100% - 2rem, var(--container-main));
+    margin: 0 auto;
+  }
+
+  .intro {
+    max-width: 40rem;
+  }
+
+  .kicker {
+    margin: 0;
+    color: var(--brand-primary);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+  }
+
+  h2 {
+    margin: var(--space-3) 0;
+    font-size: clamp(var(--fs-xl), 4vw, var(--fs-2xl));
+  }
+
+  .intro p:last-child {
+    color: var(--text-muted);
+  }
+
+  .diagram {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-8);
+  }
+
+  .node {
+    position: relative;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: var(--bg-raised);
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+  }
+
+  .node::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -1rem;
+    width: 1px;
+    height: 1rem;
+    background: color-mix(in srgb, var(--brand-primary) 35%, var(--border));
+  }
+
+  .node:last-child::after {
+    display: none;
+  }
+
+  .node--primary {
+    border-color: color-mix(in srgb, var(--brand-primary) 50%, var(--border));
+    background: linear-gradient(135deg, color-mix(in srgb, var(--brand-primary-muted) 70%, transparent), var(--bg-raised));
+  }
+
+  @media (min-width: 768px) {
+    .diagram {
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      align-items: center;
+    }
+
+    .node::after {
+      left: auto;
+      right: -1rem;
+      top: 50%;
+      bottom: auto;
+      width: 1rem;
+      height: 1px;
+    }
+  }
+</style>
