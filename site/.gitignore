@@ -4,3 +4,8 @@ node_modules
 .env
 .env.*
 !.env.example
+
+# Generated at prebuild — source of truth lives elsewhere
+public/og-default.png
+public/install.sh
+public/install.ps1

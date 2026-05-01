@@ -2,18 +2,43 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import sitemap from '@astrojs/sitemap';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   site: 'https://mailify.donilite.me',
   trailingSlash: 'never',
 
+  vite: {
+    plugins: [tailwindcss()],
+  },
+
   integrations: [
     starlight({
       title: 'Mailify',
       description: 'Self-hosted, theme-aware transactional mail server in Rust.',
+      disable404Route: true,
+      expressiveCode: {
+        themes: ['github-dark-default', 'github-light-default'],
+        themeCssRoot: ':root',
+        themeCssSelector: (theme) =>
+          `[data-theme='${theme.type === 'dark' ? 'dark' : 'light'}']`,
+        styleOverrides: {
+          borderRadius: 'var(--radius-md)',
+          borderColor: 'var(--color-border)',
+          codeFontFamily: 'var(--font-mono)',
+          codeFontSize: '0.9rem',
+          codeLineHeight: '1.6',
+          frames: {
+            shadowColor: 'transparent',
+            editorActiveTabBorderColor: 'var(--color-brand-primary)',
+            editorActiveTabIndicatorBottomColor: 'var(--color-brand-primary)',
+            terminalBackground: 'var(--color-paper-raised)',
+            terminalTitlebarBackground: 'var(--color-paper)',
+          },
+        },
+      },
       logo: {
-        light: './public/logo.png',
-        dark: './public/logo-white.png',
+        src: './src/assets/logo.svg',
         alt: 'Mailify',
         replacesTitle: false,
       },
@@ -31,7 +56,7 @@ export default defineConfig({
       head: [
         {
           tag: 'meta',
-          attrs: { property: 'og:image', content: 'https://mailify.donilite.me/og-default.svg' },
+          attrs: { property: 'og:image', content: 'https://mailify.donilite.me/og-default.png' },
         },
         {
           tag: 'meta',
@@ -99,6 +124,20 @@ export default defineConfig({
         },
       ],
     }),
-    sitemap(),
+    sitemap({
+      changefreq: 'weekly',
+      priority: 0.8,
+      lastmod: new Date(),
+      filter: (page) => !page.includes('/404'),
+      serialize(item) {
+        if (item.url === 'https://mailify.donilite.me/') {
+          return { ...item, priority: 1.0 };
+        }
+        if (item.url.includes('/docs/')) {
+          return { ...item, priority: 0.9 };
+        }
+        return item;
+      },
+    }),
   ],
 });

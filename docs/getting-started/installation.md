@@ -5,8 +5,6 @@ sidebar:
   order: 1
 ---
 
-# Installation
-
 Mailify ships four install paths. Pick the one that matches your target.
 
 ## 1. Docker (recommended)
@@ -71,7 +69,9 @@ mailify
 
 ## 3. `cargo install` (Rust toolchain)
 
-> **Status:** planned. Publishing to crates.io is gated on the lib crates being deemed API-stable. Track progress in [`TODO.md §4.1`](https://github.com/donilite/mailify/blob/master/TODO.md).
+:::caution[Planned, not yet released]
+Publishing to crates.io is gated on the lib crates being deemed API-stable. Track progress in [`TODO.md §4.1`](https://github.com/donilite/mailify/blob/master/TODO.md).
+:::
 
 When ready:
 
@@ -79,7 +79,11 @@ When ready:
 cargo install mailify-api --locked
 ```
 
-This installs the `mailify` binary into `$CARGO_HOME/bin`. Note that `cargo install` does **not** ship the compiled template bundle — you will need to either build them from source (see [Template contract](../reference/template-contract.md)) or point `MAILIFY_TEMPLATES__PATH` at a pre-built bundle extracted from a GitHub Release archive.
+This installs the `mailify` binary into `$CARGO_HOME/bin`.
+
+:::note
+`cargo install` does **not** ship the compiled template bundle — you'll either build them from source (see [Template contract](../reference/template-contract.md)) or point `MAILIFY_TEMPLATES__PATH` at a pre-built bundle extracted from a GitHub Release archive.
+:::
 
 ## 4. Build from source
 
@@ -102,3 +106,4 @@ cargo build --release --bin mailify
 - [Send your first email →](./quickstart.md)
 - [Understand the moving parts →](./concepts.md)
 - [Configure SMTP for your provider →](../guides/configure-smtp.md)
+- [Brand your mail →](../guides/configure-theme.md)

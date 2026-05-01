@@ -355,10 +355,114 @@ When in doubt, apply these in order:
 
 ---
 
+## 15. Tailwind v4 integration
+
+The marketing site (`site/`) uses **Tailwind v4** wired through `@tailwindcss/vite`. There is no `tailwind.config.{js,ts}` — Tailwind v4 is **CSS-first**: tokens declared in `@theme {}` inside [`site/src/styles/tokens.css`](site/src/styles/tokens.css) automatically become utilities (`bg-brand-primary`, `text-ink-700`, `rounded-lg`, …).
+
+### 15.1 Wiring
+
+- `astro.config.mjs` → `vite: { plugins: [tailwindcss()] }`.
+- `site/src/styles/tokens.css` is the single source of truth:
+  1. **Tailwind imports are split, NOT `@import "tailwindcss"`** :
+     ```css
+     @import 'tailwindcss/theme.css'     layer(theme);
+     @import 'tailwindcss/utilities.css' layer(utilities);
+     ```
+     Preflight is **intentionally omitted**. The full `@import "tailwindcss"` pulls a global CSS reset that resets `h1`/`p`/`ul` margins and list markers — that mangles Starlight's docs typography (heading sizes collapse, lists lose bullets, links default-color). Starlight ships its own scoped reset; ours adds nothing. If a marketing component needs a real reset, scope it manually with `.reset { all: revert; }` etc.
+  2. `@variant dark (&:where([data-theme='dark'], [data-theme='dark'] *))` rebinds Tailwind's built-in `dark:` variant to our `[data-theme]` attribute (instead of `prefers-color-scheme`), so it stays in sync with `ThemeToggle.astro` + Starlight's theme provider.
+  3. `@theme { … }` declares **every** token Tailwind should expose as utilities.
+  4. `:root[data-theme='dark']` overrides the same `--color-*` vars for dark mode — utilities and raw `var(--color-…)` references both flip automatically.
+  5. Legacy aliases (`--brand-primary`, `--space-4`, …) are kept as `var(--color-brand-primary)` etc. so older components written before Tailwind landed keep working without a rewrite.
+
+### 15.2 Token → utility mapping
+
+Tailwind v4 generates utilities from the prefix of each `--*-name` declared in `@theme`. The naming convention is **enforced by Tailwind**, so it's worth memorizing.
+
+| `@theme` prefix | Utilities generated | Example |
+|----------------|---------------------|---------|
+| `--color-*` | `bg-*`, `text-*`, `border-*`, `ring-*`, `from-*`, `to-*`, `via-*`, `outline-*`, `decoration-*`, `accent-*`, `caret-*`, `divide-*`, `placeholder-*` | `bg-brand-primary`, `text-ink-700` |
+| `--font-*` | `font-*` | `font-display`, `font-mono` |
+| `--text-*` | `text-*` (typography scale) | `text-md`, `text-3xl` |
+| `--spacing` (single) | `p-N`, `m-N`, `gap-N`, `w-N`, `h-N`, etc. — `N × spacing` | `p-4` = `4 × 4px` = `16px` |
+| `--radius-*` | `rounded-*` | `rounded-md`, `rounded-full` |
+| `--shadow-*` | `shadow-*` | `shadow-md`, `shadow-lg` |
+| `--container-*` | `max-w-*`, `mx-auto` containers | `max-w-prose`, `max-w-main` |
+| `--breakpoint-*` | responsive variants | `sm:`, `md:`, `lg:`, `xl:` |
+
+### 15.3 When to use utility vs CSS var
+
+- **Tailwind utility** — for layout, spacing, typography, color in JSX-style markup. Reads cleanly inline. Default choice for new components.
+- **Raw `var(--color-…)`** — for SVG fills/strokes, CSS-in-JS dynamic values, gradients with `color-mix()`, anywhere a utility doesn't exist or you need the raw value. The two systems share the same `--color-*` vars, so they stay in sync.
+- **Scoped `<style>`** — for complex, single-use styles (the hero's orb glows, the architecture diagram). Compose with Tailwind, don't replace it.
+
+### 15.4 Component pattern (recommended)
+
+```astro
+---
+// Hero.astro — utility-first with raw vars only where utilities can't reach.
+---
+<section class="bg-paper-raised dark:bg-paper">
+  <div class="mx-auto grid max-w-wide gap-12 px-4 py-24 lg:grid-cols-[1.1fr_minmax(22rem,30rem)]">
+    <div>
+      <p class="mb-6 inline-flex rounded-full bg-brand-primary-muted px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-primary">
+        Self-hosted · Theme-aware · Rust-fast
+      </p>
+      <h1 class="text-3xl font-semibold leading-tight tracking-tighter text-ink-900 lg:text-4xl">
+        The mail server that wears your brand.
+      </h1>
+      <p class="mt-6 max-w-xl text-md text-ink-500">
+        Self-hosted transactional mail with your colors, your templates, and your SMTP provider.
+      </p>
+    </div>
+
+    {/* SVG strokes use raw vars so they flip with [data-theme] */}
+    <svg viewBox="0 0 64 64" class="size-32" aria-hidden="true">
+      <path d="M..." stroke="var(--color-brand-primary)" stroke-width="4" fill="none"/>
+    </svg>
+  </div>
+</section>
+```
+
+### 15.5 Dark mode
+
+Already wired. Use `dark:` variant on any utility:
+
+```astro
+<button class="bg-brand-primary text-paper-raised dark:bg-brand-primary dark:text-ink-900">
+  CTA
+</button>
+```
+
+The `--color-*` vars are redefined under `[data-theme='dark']` in `tokens.css`, so `bg-brand-primary` already flips. Use `dark:` only when you need a *different token* in dark mode (rare with our system — most of the time the auto-flip is enough).
+
+### 15.6 What NOT to do
+
+- ❌ Don't add a `tailwind.config.js`. Tailwind v4 is CSS-first; that file is legacy.
+- ❌ Don't switch to `@import "tailwindcss"` — it pulls preflight, which destroys Starlight's docs typography (h1/p/ul margins, list markers, link colors all reset). Keep the split imports.
+- ❌ Don't redeclare tokens elsewhere (in component `<style>` blocks, in other CSS files). One source of truth — `tokens.css`.
+- ❌ Don't use `class:list={...}` to compose colors at runtime — Tailwind needs to see literal class names at build time. Use full conditional ternaries with literal classes instead.
+- ❌ Don't bypass `@variant dark (...)` and use Tailwind's default `prefers-color-scheme` dark mode — it would desync from Starlight + the ThemeToggle.
+
+### 15.7 Migrating existing components
+
+Existing components in `site/src/components/*.astro` use scoped `<style>` blocks with raw CSS vars. They keep working because of the legacy aliases in §15.1.5. Migrate incrementally — pick a component, replace its `<style>` block with Tailwind utilities, delete the legacy `<style>`.
+
+Suggested migration order (simplest → most painful):
+1. `404.astro`, `pricing.astro` — small, mostly text.
+2. `FeatureGrid.astro`, `CodeTabs.astro` — clear card/tab patterns.
+3. `SiteFooter.astro`, `SiteHeader.astro` — chrome.
+4. `Hero.astro`, `ThemeShowcase.astro`, `ArchitectureDiagram.astro` — keep their bespoke `<style>` for the SVG/animation parts; convert layout chrome only.
+
+---
+
 ## 14. Versioning this document
 
 - Bump `## N. …` section number only when adding new sections (never renumber).
 - Changes to tokens (colors, sizes) = note in `CHANGELOG.md` under `### Design`.
 - Major palette/typography changes = bump to a new major doc version in a `DESIGN-v2.md` and link back, so historical context is preserved.
 
-**Current version:** `v1` — 2026-04-23 — initial system.
+**Current version:** `v2` — 2026-04-26 — Tailwind v4 integration via `@theme` + `@variant dark`.
+
+### Changelog
+- `v2` (2026-04-26) — Added §15: Tailwind v4 wired through `@tailwindcss/vite`. Tokens exposed via `@theme {}` in `tokens.css`. Dark variant rebound to `[data-theme]` attribute. Legacy `--brand-*` / `--space-*` aliases preserved.
+- `v1` (2026-04-23) — Initial system.

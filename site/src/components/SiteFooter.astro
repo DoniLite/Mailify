@@ -1,128 +1,90 @@
-<footer class="site-footer">
-  <div class="shell">
-    <div class="footer-brand">
-      <a class="brand" href="/">
-        <img class="logo logo--light" src="/logo.png" alt="Mailify" width="120" height="32" />
-        <img class="logo logo--dark" src="/logo-white.png" alt="Mailify" width="120" height="32" />
-        <span>Mailify</span>
+---
+import Logo from '../assets/logo.svg?raw';
+
+const cols = [
+  {
+    title: 'Product',
+    links: [
+      { label: 'Docs', href: '/docs' },
+      { label: 'API', href: '/docs/reference/http-api' },
+      { label: 'Pricing', href: '/pricing' },
+    ],
+  },
+  {
+    title: 'Project',
+    links: [
+      { label: 'GitHub', href: 'https://github.com/donilite/mailify' },
+      { label: 'Roadmap', href: 'https://github.com/donilite/mailify/blob/master/TODO.md' },
+      { label: 'Sponsors', href: 'https://github.com/sponsors/donilite' },
+    ],
+  },
+  {
+    title: 'Community',
+    links: [
+      { label: 'Discussions', href: 'https://github.com/donilite/mailify/discussions' },
+      { label: 'Issues', href: 'https://github.com/donilite/mailify/issues' },
+      { label: 'Contributing', href: '/docs/contributing/overview' },
+    ],
+  },
+];
+---
+
+<footer
+  class="border-t border-border bg-linear-to-b from-brand-primary-muted/30 to-bg pb-8 pt-16"
+>
+  <div
+    class="mx-auto grid w-[min(100%-2rem,var(--container-wide))] gap-12 lg:grid-cols-[1.25fr_1fr] lg:items-start"
+  >
+    <div>
+      <a
+        class="relative inline-flex items-center gap-3 font-display font-semibold text-ink-900"
+        href="/"
+        aria-label="Mailify home"
+      >
+        <span
+          class="brand-mark inline-flex size-8 text-brand-primary"
+          set:html={Logo}
+          aria-hidden="true"
+        ></span>
+        <span class="text-md font-bold tracking-tight">Mailify</span>
       </a>
-      <p>The self-hosted transactional email server that wears your brand.</p>
+      <p class="mt-4 max-w-md text-sm text-ink-500">
+        The self-hosted transactional email server that wears your brand.
+      </p>
+
+      <div class="mt-8 flex flex-wrap items-center gap-3 text-xs text-ink-500">
+        <span>MIT-licensed · made in Rust</span>
+        <span aria-hidden>·</span>
+        <a class="hover:text-ink-900" href="https://github.com/donilite/mailify" rel="noopener">v0.1.2</a>
+      </div>
     </div>
 
-    <div class="footer-links">
-      <div>
-        <h2>Product</h2>
-        <a href="/docs">Docs</a>
-        <a href="/docs/reference/http-api">API</a>
-        <a href="/pricing">Pricing</a>
-      </div>
-      <div>
-        <h2>Project</h2>
-        <a href="https://github.com/donilite/mailify">GitHub</a>
-        <a href="https://github.com/donilite/mailify/blob/master/TODO.md">Roadmap</a>
-        <a href="https://github.com/sponsors/donilite">Sponsors</a>
-      </div>
-      <div>
-        <h2>Community</h2>
-        <a href="https://github.com/donilite/mailify/discussions">Discussions</a>
-        <a href="https://github.com/donilite/mailify/issues">Issues</a>
-        <a href="/docs/contributing/overview">Contributing</a>
-      </div>
+    <div class="grid grid-cols-1 gap-8 sm:grid-cols-3">
+      {cols.map((col) => (
+        <div>
+          <h2 class="m-0 mb-4 font-display text-sm font-semibold text-ink-900">{col.title}</h2>
+          <ul class="m-0 list-none space-y-3 p-0">
+            {col.links.map((link) => (
+              <li>
+                <a
+                  class="block text-sm text-ink-500 transition hover:text-ink-900 focus-visible:text-ink-900"
+                  href={link.href}
+                  rel={link.href.startsWith('http') ? 'noopener' : undefined}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
   </div>
 </footer>
 
 <style>
-  .site-footer {
-    border-top: 1px solid var(--border);
-    padding: var(--space-16) 0 var(--space-8);
-    background:
-      linear-gradient(180deg, color-mix(in srgb, var(--brand-primary-muted) 30%, transparent), transparent 26%),
-      var(--bg);
-  }
-
-  .shell {
-    width: min(100% - 2rem, var(--container-wide));
-    margin: 0 auto;
-    display: grid;
-    gap: var(--space-12);
-  }
-
-  .footer-brand p {
-    max-width: 32rem;
-    margin: var(--space-4) 0 0;
-    color: var(--text-muted);
-  }
-
-  .brand {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-3);
-    color: var(--text);
-    font-family: var(--font-display);
-    font-weight: 600;
-  }
-
-  .logo {
-    height: 2rem;
-    width: auto;
-  }
-
-  .logo--dark {
-    display: none;
-  }
-
-  :root[data-theme='dark'] .logo--light {
-    display: none;
-  }
-
-  :root[data-theme='dark'] .logo--dark {
-    display: block;
-  }
-
-  .brand span {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
-
-  .footer-links {
-    display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-    gap: var(--space-8);
-  }
-
-  .footer-links h2 {
-    margin: 0 0 var(--space-4);
-    font-size: var(--fs-sm);
-  }
-
-  .footer-links a {
-    display: block;
-    margin-top: var(--space-3);
-    color: var(--text-muted);
-    font-size: var(--fs-sm);
-  }
-
-  .footer-links a:hover {
-    color: var(--text);
-  }
-
-  @media (min-width: 1024px) {
-    .shell {
-      grid-template-columns: 1.25fr 1fr;
-      align-items: start;
-    }
-
-    .footer-links {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
+  .brand-mark :global(svg) {
+    width: 100%;
+    height: 100%;
   }
 </style>
