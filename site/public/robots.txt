@@ -1,4 +1,7 @@
+# https://mailify.donilite.me
+
 User-agent: *
 Allow: /
+Disallow: /404
 
 Sitemap: https://mailify.donilite.me/sitemap-index.xml

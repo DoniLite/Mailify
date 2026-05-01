@@ -5,9 +5,11 @@ sidebar:
   order: 1
 ---
 
-# Common errors
-
 Errors are grouped by stage. If yours isn't here, check [Debugging](./debugging.md) and [FAQ](./faq.md).
+
+:::tip[Speed up debugging]
+Set `RUST_LOG=mailify=debug,mailify_api=debug,mailify_queue=debug` before reproducing. Most errors below are easier to identify with the structured logs surfaced by these targets.
+:::
 
 ## Startup
 
@@ -97,6 +99,10 @@ psql "$MAILIFY_DATABASE__URL" -c 'SELECT 1'
 - Check `docker compose logs mailify` for the worker panic.
 - If stuck past `retry_backoff_secs`, restart the server — apalis will requeue on next poll.
 - Persistent hangs often mean an external dependency (SMTP provider) is timing out silently; raise `MAILIFY_SMTP__TIMEOUT_SECS` briefly to confirm, then fix the upstream.
+
+:::danger[SMTP error 550 = upstream rejection]
+A `5xx` SMTP code from your provider means the provider refused the message — Mailify just relays the rejection. Don't bury this; investigate domain auth (SPF/DKIM/DMARC) before retrying.
+:::
 
 ### `relay access denied` / `550 5.7.1`
 

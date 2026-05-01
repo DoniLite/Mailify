@@ -27,99 +27,33 @@ const features = [
 ];
 ---
 
-<section class="section">
-  <div class="shell">
-    <div class="intro">
-      <p class="kicker">Why Mailify</p>
-      <h2>Built for developers who want ownership without redoing email infra from scratch.</h2>
+<section class="py-16">
+  <div class="mx-auto w-[min(100%-2rem,var(--container-main))]">
+    <div class="max-w-3xl">
+      <p class="m-0 font-display text-sm font-semibold text-brand-primary">Why Mailify</p>
+      <h2
+        class="mt-3 max-w-[18ch] font-display font-semibold leading-tight text-ink-900"
+        style="font-size: clamp(var(--text-xl), 5vw, var(--text-2xl));"
+      >
+        Built for developers who want ownership without redoing email infra from scratch.
+      </h2>
     </div>
 
-    <div class="grid">
+    <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {features.map((feature) => (
-        <article class="card">
-          <div class="icon" aria-hidden="true"></div>
-          <h3>{feature.title}</h3>
-          <p>{feature.body}</p>
+        <article
+          class="group rounded-lg border border-border bg-paper-raised p-6 transition duration-150 hover:-translate-y-0.5 hover:border-brand-primary/30 hover:shadow-md"
+        >
+          <div
+            class="size-8 rounded-[0.7rem] bg-linear-[135deg] from-brand-primary to-brand-primary/40"
+            aria-hidden="true"
+          ></div>
+          <h3 class="mt-4 mb-3 font-display text-md font-semibold text-ink-900">
+            {feature.title}
+          </h3>
+          <p class="m-0 text-sm text-ink-500">{feature.body}</p>
         </article>
       ))}
     </div>
   </div>
 </section>
-
-<style>
-  .section {
-    padding: var(--space-16) 0;
-  }
-
-  .shell {
-    width: min(100% - 2rem, var(--container-main));
-    margin: 0 auto;
-  }
-
-  .kicker {
-    margin: 0;
-    color: var(--brand-primary);
-    font-family: var(--font-display);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-  }
-
-  .intro h2 {
-    max-width: 18ch;
-    margin: var(--space-3) 0 0;
-    font-size: clamp(var(--fs-xl), 5vw, var(--fs-2xl));
-    line-height: 1.1;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-    gap: var(--space-4);
-    margin-top: var(--space-8);
-  }
-
-  .card {
-    padding: var(--space-6);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    background: var(--bg-raised);
-    transition: transform 150ms ease-out, box-shadow 150ms ease-out, border-color 150ms ease-out;
-  }
-
-  .card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    border-color: color-mix(in srgb, var(--brand-primary) 30%, var(--border));
-  }
-
-  .icon {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0.7rem;
-    background:
-      linear-gradient(135deg, var(--brand-primary), color-mix(in srgb, var(--brand-primary) 42%, white));
-  }
-
-  .card h3 {
-    margin: var(--space-4) 0 var(--space-3);
-    font-size: var(--fs-md);
-  }
-
-  .card p {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: var(--fs-sm);
-  }
-
-  @media (min-width: 640px) {
-    .grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-</style>

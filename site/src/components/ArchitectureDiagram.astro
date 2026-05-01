@@ -10,20 +10,31 @@ const crates = [
 ];
 ---
 
-<section class="section">
-  <div class="shell">
-    <div class="intro">
-      <p class="kicker">Architecture</p>
-      <h2>Seven crates. One delivery path.</h2>
-      <p>
+<section class="py-16 lg:pb-24">
+  <div class="mx-auto w-[min(100%-2rem,var(--container-main))]">
+    <div class="max-w-2xl">
+      <p class="m-0 font-display text-sm font-semibold text-brand-primary">Architecture</p>
+      <h2
+        class="my-3 font-display font-semibold leading-tight text-ink-900"
+        style="font-size: clamp(var(--text-xl), 4vw, var(--text-2xl));"
+      >
+        Seven crates. One delivery path.
+      </h2>
+      <p class="m-0 text-ink-500">
         The API layer receives mail requests, auth validates tokens, templates render branded HTML,
         and the queue worker ships through SMTP.
       </p>
     </div>
 
-    <div class="diagram">
+    <div class="diagram mt-8 grid grid-cols-1 gap-4 md:grid-cols-7 md:items-center">
       {crates.map((crateName, index) => (
-        <div class:list={['node', index === crates.length - 1 && 'node--primary']}>
+        <div
+          class:list={[
+            'node relative rounded-2xl border border-border bg-paper-raised px-4 py-3 font-mono text-sm text-ink-700',
+            index === crates.length - 1 &&
+              'border-brand-primary/50 bg-linear-[135deg] from-brand-primary-muted/70 to-paper-raised text-ink-900',
+          ]}
+        >
           {crateName}
         </div>
       ))}
@@ -32,53 +43,6 @@ const crates = [
 </section>
 
 <style>
-  .section {
-    padding: var(--space-16) 0 var(--space-24);
-  }
-
-  .shell {
-    width: min(100% - 2rem, var(--container-main));
-    margin: 0 auto;
-  }
-
-  .intro {
-    max-width: 40rem;
-  }
-
-  .kicker {
-    margin: 0;
-    color: var(--brand-primary);
-    font-family: var(--font-display);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-  }
-
-  h2 {
-    margin: var(--space-3) 0;
-    font-size: clamp(var(--fs-xl), 4vw, var(--fs-2xl));
-  }
-
-  .intro p:last-child {
-    color: var(--text-muted);
-  }
-
-  .diagram {
-    display: grid;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-    gap: var(--space-4);
-    margin-top: var(--space-8);
-  }
-
-  .node {
-    position: relative;
-    padding: 1rem 1.1rem;
-    border: 1px solid var(--border);
-    border-radius: 1rem;
-    background: var(--bg-raised);
-    font-family: var(--font-mono);
-    font-size: var(--fs-sm);
-  }
-
   .node::after {
     content: '';
     position: absolute;
@@ -88,22 +52,10 @@ const crates = [
     height: 1rem;
     background: color-mix(in srgb, var(--brand-primary) 35%, var(--border));
   }
-
   .node:last-child::after {
     display: none;
   }
-
-  .node--primary {
-    border-color: color-mix(in srgb, var(--brand-primary) 50%, var(--border));
-    background: linear-gradient(135deg, color-mix(in srgb, var(--brand-primary-muted) 70%, transparent), var(--bg-raised));
-  }
-
   @media (min-width: 768px) {
-    .diagram {
-      grid-template-columns: repeat(7, minmax(0, 1fr));
-      align-items: center;
-    }
-
     .node::after {
       left: auto;
       right: -1rem;

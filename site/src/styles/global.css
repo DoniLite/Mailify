@@ -1,3 +1,12 @@
+/*
+ * Global styles. Two scopes:
+ *   1. Truly global resets (fonts, box-sizing, prefers-reduced-motion).
+ *   2. Marketing-only rules under .marketing — applied via the MarketingLayout
+ *      <body class="marketing"> wrapper. Starlight docs pages MUST NOT inherit
+ *      heading/link colors from here, otherwise the sidebar links go invisible
+ *      and the docs typography breaks.
+ */
+
 @import '@fontsource/inter/400.css';
 @import '@fontsource/inter/500.css';
 @import '@fontsource/geist-sans/500.css';
@@ -6,7 +15,10 @@
 @import '@fontsource/geist-mono/400.css';
 @import '@fontsource/geist-mono/500.css';
 
-* {
+/* ─── Truly global ─── */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -27,33 +39,56 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+img {
+  max-width: 100%;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--brand-primary) 26%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Marketing-only (scoped under .marketing on <body>) ─── */
+.marketing h1,
+.marketing h2,
+.marketing h3,
+.marketing h4,
+.marketing h5,
+.marketing h6 {
   font-family: var(--font-display);
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--text);
 }
 
-a {
+.marketing a {
   color: var(--link);
   text-decoration: none;
   transition: color 150ms ease-out;
 }
 
-a:hover {
+.marketing a:hover {
   color: var(--brand-primary-hover);
 }
 
-img {
-  max-width: 100%;
-  display: block;
-}
-
-code, pre {
-  font-family: var(--font-mono);
-}
-
-code:not(pre code) {
+.marketing code:not(pre code) {
   padding: 0.1rem 0.35rem;
   border-radius: var(--radius-sm);
   background: var(--brand-primary-muted);
@@ -61,7 +96,7 @@ code:not(pre code) {
   font-size: 0.925em;
 }
 
-.skip-link {
+.marketing .skip-link {
   position: absolute;
   left: var(--space-4);
   top: -3rem;
@@ -72,10 +107,12 @@ code:not(pre code) {
   color: var(--paper);
 }
 
-.skip-link:focus {
+.marketing .skip-link:focus {
   top: var(--space-4);
 }
 
+/* Buttons used across marketing pages */
+.marketing .btn,
 .btn {
   display: inline-flex;
   align-items: center;
@@ -91,52 +128,38 @@ code:not(pre code) {
   text-decoration: none;
 }
 
+.marketing .btn-primary,
 .btn-primary {
   background: var(--brand-primary);
   color: white;
 }
 
+.marketing .btn-primary:hover,
 .btn-primary:hover {
   background: var(--brand-primary-hover);
   color: white;
 }
 
+.marketing .btn-secondary,
 .btn-secondary {
   background: var(--bg-raised);
   color: var(--text);
   border-color: var(--border);
 }
 
+.marketing .btn-secondary:hover,
 .btn-secondary:hover {
   background: var(--ink-100);
   color: var(--text);
 }
 
+.marketing .btn-ghost,
 .btn-ghost {
   background: transparent;
   color: var(--link);
 }
 
+.marketing .btn-ghost:hover,
 .btn-ghost:hover {
   background: var(--brand-primary-muted);
-}
-
-:focus-visible {
-  outline: 2px solid var(--brand-primary);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
-
-::selection {
-  background: color-mix(in srgb, var(--brand-primary) 26%, transparent);
-}
-
-/* Prefers reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
 }
